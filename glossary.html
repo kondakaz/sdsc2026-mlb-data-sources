@@ -1,4 +1,4 @@
-<title>MLB 部門 過去の分析報告アーカイブ（SDSC2026）</title>
+<title>MLB データの用語集・Glossary 紹介（SDSC2026）</title>
 <style>
   :root {
     --bg: #f4f2ec;
@@ -340,11 +340,6 @@
   tbody td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
   table a { font-size: .82em; word-break: break-all; }
 
-  /* 報告一覧はタイトル列が長いため折り返しを許可する */
-  .reports table { min-width: 40rem; }
-  .reports tbody td:first-child { white-space: normal; min-width: 18rem; }
-  .reports tbody td:last-child { white-space: nowrap; }
-
   .badge {
     display: inline-block;
     font-size: .72rem;
@@ -463,18 +458,17 @@
     <div class="brand">SDSC2026<br>MLB 部門 資料</div>
     <p class="label">サイト内ページ</p>
     <a class="nav-item" href="index.html">MLB データ収集方法の調査まとめ</a>
-    <a class="nav-item current" href="past-reports.html" aria-current="page">過去の分析報告アーカイブ</a>
-    <a class="nav-item" href="glossary.html">データ用語集・Glossary</a>
+    <a class="nav-item" href="past-reports.html">過去の分析報告アーカイブ</a>
+    <a class="nav-item current" href="glossary.html" aria-current="page">データ用語集・Glossary</a>
   </nav>
 
   <header class="masthead">
     <div class="eyebrow">SDSC2026 &nbsp;/&nbsp; MLB 部門 資料</div>
-    <h1>過去の MLB 部門 分析報告アーカイブ</h1>
-    <p class="lede">スポーツデータサイエンスコンペティションで MLB 部門が実施された 2023年度・2025年度の報告書の目次（発表者・所属・タイトル）と、報告書本体の入手先の案内。</p>
+    <h1>MLB データの用語集・Glossary 紹介</h1>
+    <p class="lede">Statcast データの列（変数）の意味を調べるリファレンスと、セイバーメトリクス指標の定義を学ぶ Glossary を、英語・日本語それぞれ紹介する。</p>
     <div class="meta">
       <span><b>作成日</b>&nbsp; 2026-07-18</span>
       <span><b>用途</b>&nbsp; SDSC2026 MLB 部門の参加者向け資料</span>
-      <span><b>関連</b>&nbsp; <a href="index.html">MLB データ収集方法の調査まとめ</a></span>
     </div>
   </header>
 
@@ -483,161 +477,95 @@
     <nav class="toc" aria-label="目次">
       <h2>目次</h2>
       <ol>
-        <li><a href="#sec-1">報告書の入手先</a></li>
-        <li><a href="#sec-2">2023年度 MLB 部門の報告一覧（4件）</a></li>
-        <li><a href="#sec-3">2025年度 MLB 部門の報告一覧（9件）</a></li>
-        <li class="extra"><a href="index.html">関連資料: MLB データ収集方法の調査まとめ</a></li>
+        <li><a href="#sec-1">使い分けの早見表</a></li>
+        <li><a href="#sec-2">変数リファレンス（データの列名を調べる）</a></li>
+        <li><a href="#sec-3">指標の Glossary（用語の意味を学ぶ）</a></li>
       </ol>
     </nav>
 
     <!-- ============ 1 ============ -->
     <section id="sec-1">
-      <h2 class="sec-title"><span class="num">01</span>報告書の入手先</h2>
+      <h2 class="sec-title"><span class="num">01</span>使い分けの早見表</h2>
 
-      <p>スポーツデータサイエンスコンペティションは、日本統計学会 スポーツデータサイエンス分科会が毎年開催している。過去のコンペの報告集（各報告書をまとめた PDF）は、分科会サイトのコンペティションページに年度別に掲載されている。</p>
-
+      <p>MLB データを触っていて「調べたいもの」は、だいたい次の2つに分かれる。</p>
       <ul>
-        <li><strong>分科会サイト（トップ）</strong><br>
-          <a href="https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/" target="_blank" rel="noopener">https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/</a></li>
-        <li><strong>コンペティションページ（年度別の報告集まとめ）</strong><br>
-          <a href="https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/%E3%82%B3%E3%83%B3%E3%83%9A%E3%83%86%E3%82%A3%E3%82%B7%E3%83%A7%E3%83%B3" target="_blank" rel="noopener">https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/コンペティション</a></li>
-        <li><strong>2023年度 報告集 PDF（Google Drive）</strong><br>
-          <a href="https://drive.google.com/file/d/1fOrR2rqYeqfAQXVRKfQelCrfh4l8dmxN/view?usp=sharing" target="_blank" rel="noopener">https://drive.google.com/file/d/1fOrR2rqYeqfAQXVRKfQelCrfh4l8dmxN/view</a></li>
+        <li><strong>変数リファレンス</strong> — ダウンロードした CSV の列名（<code>release_speed</code>・<code>launch_angle</code> など）が何を意味するかを調べる</li>
+        <li><strong>指標の Glossary</strong> — 分析やレポートで使う指標（wOBA・FIP・Barrel など）の定義・背景を学ぶ</li>
       </ul>
 
-      <div class="lead-note">
-        <p>MLB 部門が実施されたのは <strong>2023年度</strong> と <strong>2025年度</strong> の2回。2025年度の報告集は、2026年7月時点ではコンペティションページに 2024年度分まで掲載のため、公開され次第上記コンペティションページから入手できる。</p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>調べたいもの</th><th>英語（公式）</th><th>日本語</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>データの列（変数）の意味</td>
+              <td><a href="https://baseballsavant.mlb.com/csv-docs" target="_blank" rel="noopener">Baseball Savant CSV Documentation</a></td>
+              <td><a href="https://www.math.chuo-u.ac.jp/~sakaori/baseballr.html" target="_blank" rel="noopener">baseballr および statcast の説明（中央大学 酒折研究室）</a></td>
+            </tr>
+            <tr>
+              <td>指標の定義・背景</td>
+              <td><a href="https://www.mlb.com/glossary/statcast" target="_blank" rel="noopener">MLB 公式 Statcast Glossary</a></td>
+              <td><a href="https://1point02.jp/op/gnav/glossary/gls_index.aspx" target="_blank" rel="noopener">1.02 ESSENCE OF BASEBALL Glossary（DELTA）</a></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <p>各年度のコンペ本体のウェブサイト（審査会プログラム・審査結果など）は次のとおり。</p>
-      <ul>
-        <li>2023年度: <a href="https://2023.sports.ywebsys.net" target="_blank" rel="noopener">https://2023.sports.ywebsys.net</a></li>
-        <li>2025年度: <a href="https://sports.ywebsys.net" target="_blank" rel="noopener">https://sports.ywebsys.net</a></li>
-      </ul>
+      <div class="lead-note">
+        <p>おすすめの流れ: まず日本語ページで概念をつかみ、分析で実際に使う段階では<strong>英語の公式ドキュメントで正確な定義を確認する</strong>。レポートに指標を書くときは、公式 Glossary を引用元にすると説得力が上がる。</p>
+      </div>
     </section>
 
     <!-- ============ 2 ============ -->
     <section id="sec-2">
-      <h2 class="sec-title"><span class="num">02</span>2023年度 MLB 部門の報告一覧（4件）</h2>
+      <h2 class="sec-title"><span class="num">02</span>変数リファレンス（データの列名を調べる）</h2>
 
-      <p>2023年度（第11回スポーツデータ解析コンペティション）の MLB 部門では、次の4件の報告があった。大谷翔平選手を題材にした分析が2件、投手の安定度・ルール改正の影響分析が各1件である。</p>
+      <h3>2.1 Baseball Savant CSV Documentation（英語・公式）</h3>
+      <p><a href="https://baseballsavant.mlb.com/csv-docs" target="_blank" rel="noopener">https://baseballsavant.mlb.com/csv-docs</a></p>
+      <p>Statcast Search からダウンロードできる CSV の<strong>全列の公式定義</strong>。<code>pitch_type</code>（球種）、<code>release_speed</code>（初速）、<code>launch_angle</code>（打球角度）、<code>estimated_woba_using_speedangle</code>（xwOBA 系）など、1球単位データの約118項目が一覧になっている。</p>
+      <ul>
+        <li>Python の <code>pybaseball.statcast()</code> や R の Statcast 取得関数が返すデータフレームの列も、基本的にこの定義と同じ。</li>
+        <li>列名で意味が分からないものが出てきたら、まずこのページを引くのが確実。</li>
+      </ul>
 
-      <div class="table-scroll reports">
-        <table>
-          <thead>
-            <tr><th>タイトル</th><th>発表者</th><th>所属</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>先発投手の安定度について</td>
-              <td>加瀬 稔弥・山本 義郎</td>
-              <td>東海大学</td>
-            </tr>
-            <tr>
-              <td>MLB のルール改正による攻守への影響 〜シフト禁止によるトレンドの変化〜</td>
-              <td>瀧柳 祐介・二ノ宮 碧・織田 大志・廣津 信義</td>
-              <td>順天堂大学・富士ソフト株式会社</td>
-            </tr>
-            <tr>
-              <td>投手・大谷翔平に対する Run Value に基づいた打線編成</td>
-              <td>金田 大輝・江頭 健斗・松澤 智史・田畑 耕治</td>
-              <td>東京理科大学</td>
-            </tr>
-            <tr>
-              <td>客観的総合指数から見る大谷翔平選手の客観的な凄さ</td>
-              <td>助田 一晟</td>
-              <td>東京大学</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <h3>2.2 baseballr および statcast の説明（日本語）</h3>
+      <p><a href="https://www.math.chuo-u.ac.jp/~sakaori/baseballr.html" target="_blank" rel="noopener">https://www.math.chuo-u.ac.jp/~sakaori/baseballr.html</a></p>
+      <p>中央大学の酒折文武先生による、R の <code>baseballr</code> パッケージと Statcast データの日本語解説。第4章に <strong>Statcast データの変数の日本語対訳表</strong>があり、CSV Documentation の内容を日本語で確認できる貴重なページ。データ取得から可視化・セイバー指標計算までの R コード例も豊富。</p>
+      <ul>
+        <li>変数の説明（例）: <code>zone</code>（捕手視点のプレート上ゾーン 1〜14）、<code>bb_type</code>（打球タイプ: ゴロ・ライナー・フライ・ポップアップ）など。</li>
+        <li><strong>注意</strong>: 2019年作成のページのため、<code>baseballr</code> の関数名やインストール方法は現行バージョンと異なる部分がある。変数の対訳表として使うのが安全で、コードの書き方は<a href="index.html">データ収集方法の調査まとめ</a>の最新情報を優先してほしい。</li>
+      </ul>
     </section>
 
     <!-- ============ 3 ============ -->
     <section id="sec-3">
-      <h2 class="sec-title"><span class="num">03</span>2025年度 MLB 部門の報告一覧（9件）</h2>
+      <h2 class="sec-title"><span class="num">03</span>指標の Glossary（用語の意味を学ぶ）</h2>
 
-      <p>2025年度の MLB 部門では、次の9件の報告があった。因果推論・機械学習・映像解析といった手法面の広がりに加え、贅沢税やサラリーキャップなど制度・経済面の分析も登場している。</p>
+      <h3>3.1 MLB 公式 Statcast Glossary（英語）</h3>
+      <p><a href="https://www.mlb.com/glossary/statcast" target="_blank" rel="noopener">https://www.mlb.com/glossary/statcast</a></p>
+      <p>MLB 公式の用語集のうち Statcast 指標のセクション。<strong>xwOBA・Barrel・Sprint Speed・Outs Above Average (OAA)</strong> など、トラッキングデータから作られる指標の定義と背景が指標ごとの個別ページで説明されている。</p>
+      <ul>
+        <li>「この指標は何を測っていて、なぜ意味があるのか」という設計意図まで書かれているのが公式ならではの強み。</li>
+        <li>Statcast 以外にも Standard / Advanced などのセクションがあり、伝統的な成績指標（打率・防御率など）の定義も同じサイトで引ける。</li>
+      </ul>
 
-      <div class="table-scroll reports">
-        <table>
-          <thead>
-            <tr><th>タイトル</th><th>発表者</th><th>所属</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Pose-based Action Recognition による MLB ホームランダービー投打映像からの本塁打成否予測</td>
-              <td>稲福 力也・北島 栄司・廣瀬 颯・宮田 龍太</td>
-              <td>琉球大学</td>
-            </tr>
-            <tr>
-              <td>打者と投手タイプの相性分析</td>
-              <td>村上 雅基・尼﨑 太樹</td>
-              <td>熊本大学</td>
-            </tr>
-            <tr>
-              <td>MLB における盗塁の戦術的価値 ―得点期待値・得点効率・打者成績からの検証―</td>
-              <td>谷川 瑞樹・宮本 道子</td>
-              <td>長崎大学</td>
-            </tr>
-            <tr>
-              <td>MLB 先発投手の投球特性の可視化と指導支援</td>
-              <td>加瀬 稔弥・山本 義郎</td>
-              <td>東海大学</td>
-            </tr>
-            <tr>
-              <td>ペナルティ型課税と意図せざる影響：MLB 贅沢税がもたらす競争構造と市場行動の分析</td>
-              <td>周 娟・谷津 唯希</td>
-              <td>東京都市大学</td>
-            </tr>
-            <tr>
-              <td>野球における新たな勝利貢献指標『xWinShare』の提案 ―XGBoost による MLB トラッキングデータ分析―</td>
-              <td>河地 優馬・大浦 さやか・中西 凛・リャン ジャチー・渡波 正晴・新谷 幸弘</td>
-              <td>千葉工業大学</td>
-            </tr>
-            <tr>
-              <td>MLB 各球団にサラリーキャップ制度を導入した場合の変化</td>
-              <td>猶江 健心・山口 敦子</td>
-              <td>東京都市大学</td>
-            </tr>
-            <tr>
-              <td>打席内投球系列を考慮した因果推論による捕手の投球戦略評価</td>
-              <td>三浦 拓実・藤井 慶輔</td>
-              <td>名古屋大学</td>
-            </tr>
-            <tr>
-              <td>MLB における球場特性の定量評価と変動要因の分析 BPF、HRF、X2B および年次安定性に基づく研究</td>
-              <td>松島 沙季・石田 優利亜・高梨 春菜・西村 凌平・安藤 雅和</td>
-              <td>千葉工業大学</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <h3>3.2 1.02 ESSENCE OF BASEBALL Glossary（日本語）</h3>
+      <p><a href="https://1point02.jp/op/gnav/glossary/gls_index.aspx" target="_blank" rel="noopener">https://1point02.jp/op/gnav/glossary/gls_index.aspx</a></p>
+      <p>DELTA 社が運営する日本語のセイバーメトリクス用語集。<strong>wOBA・FIP・UZR・WAR</strong> といった主要指標の日本語解説としては最も充実しており、指標の一覧（アルファベット索引）に加えて「セイバーメトリクスの基本」「WAR の考え方」などの基礎知識の読み物もある。</p>
+      <ul>
+        <li>指標を初めて学ぶときの入口として最適。NPB の文脈での説明が中心だが、指標の考え方は MLB 分析にもそのまま使える。</li>
+        <li>サイト本体（1.02）は NPB データの有料サービスだが、この Glossary は無料で閲覧できる。</li>
+      </ul>
 
-      <h3>インフォグラフィック部門の MLB 作品</h3>
-      <p>2025年度は報告書のほかに、インフォグラフィック部門にも MLB を題材とした作品が1件あった。</p>
-      <div class="table-scroll reports">
-        <table>
-          <thead>
-            <tr><th>タイトル</th><th>発表者</th><th>所属</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>投手ごとの“癖”が見える ― MLB 配球パターン図鑑</td>
-              <td>川ノ上 裕太・髙橋 旺伸・中深迫 信一</td>
-              <td>情報科学専門学校</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="endnote">発表者・所属・タイトルは各報告書 PDF の1ページ目および 2025年度審査会プログラムからの転記。所属は大学（学校）名までに簡略化している。</p>
+      <p class="endnote">リンク先の内容・構成は 2026年7月時点の確認に基づく。</p>
     </section>
 
   </div>
 
   <footer class="colophon">
-    <span>過去の MLB 部門 分析報告アーカイブ</span>
+    <span>MLB データの用語集・Glossary 紹介</span>
     <span>SDSC2026 &nbsp;/&nbsp; 作成日 2026-07-18</span>
   </footer>
 
