@@ -1,0 +1,562 @@
+<title>MLB 部門 過去の分析報告アーカイブ（SDSC2026）</title>
+<style>
+  :root {
+    --bg: #f4f2ec;
+    --paper: #ffffff;
+    --ink: #1b2430;
+    --ink-soft: #3d4756;
+    --muted: #6c7480;
+    --accent: #1c3d5a;
+    --accent-2: #b5502e;
+    --line: #e0dbcf;
+    --line-strong: #cdc7b8;
+    --free: #2f7d5b;
+    --free-bg: #e7f1ea;
+    --paid: #a9781a;
+    --paid-bg: #f6ecd6;
+    --code-bg: #f2f0e9;
+    --code-ink: #253040;
+    --chip-bg: #eae6da;
+    --link: #1c5480;
+    --shadow: 0 1px 2px rgba(27, 36, 48, .06), 0 8px 28px rgba(27, 36, 48, .05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141a;
+      --paper: #191f28;
+      --ink: #e7e9ee;
+      --ink-soft: #b9c1cd;
+      --muted: #8b95a3;
+      --accent: #7fb0d8;
+      --accent-2: #e08a5f;
+      --line: #2a323d;
+      --line-strong: #3a444f;
+      --free: #64c79a;
+      --free-bg: #16302a;
+      --paid: #d9ad5e;
+      --paid-bg: #33290f;
+      --code-bg: #12171f;
+      --code-ink: #cdd6e2;
+      --chip-bg: #262f3a;
+      --link: #86bce8;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .28);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f2ec;
+    --paper: #ffffff;
+    --ink: #1b2430;
+    --ink-soft: #3d4756;
+    --muted: #6c7480;
+    --accent: #1c3d5a;
+    --accent-2: #b5502e;
+    --line: #e0dbcf;
+    --line-strong: #cdc7b8;
+    --free: #2f7d5b;
+    --free-bg: #e7f1ea;
+    --paid: #a9781a;
+    --paid-bg: #f6ecd6;
+    --code-bg: #f2f0e9;
+    --code-ink: #253040;
+    --chip-bg: #eae6da;
+    --link: #1c5480;
+    --shadow: 0 1px 2px rgba(27, 36, 48, .06), 0 8px 28px rgba(27, 36, 48, .05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #10141a;
+    --paper: #191f28;
+    --ink: #e7e9ee;
+    --ink-soft: #b9c1cd;
+    --muted: #8b95a3;
+    --accent: #7fb0d8;
+    --accent-2: #e08a5f;
+    --line: #2a323d;
+    --line-strong: #3a444f;
+    --free: #64c79a;
+    --free-bg: #16302a;
+    --paid: #d9ad5e;
+    --paid-bg: #33290f;
+    --code-bg: #12171f;
+    --code-ink: #cdd6e2;
+    --chip-bg: #262f3a;
+    --link: #86bce8;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .28);
+  }
+
+  * { box-sizing: border-box; }
+
+  body,
+  .page {
+    --sans: system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+      "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", "Meiryo", sans-serif;
+    --mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", "Consolas",
+      "Menlo", "Roboto Mono", ui-monospace, monospace;
+  }
+
+  .page {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding: 0 1.25rem 5rem;
+    overflow-wrap: break-word;
+  }
+
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+  }
+
+  a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--link) 35%, transparent);
+    transition: border-color .15s ease, color .15s ease;
+  }
+  a:hover { border-bottom-color: var(--link); }
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 3.5rem 0 2rem;
+    border-bottom: 2px solid var(--ink);
+    position: relative;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 1.1rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.6rem;
+    height: 2px;
+    background: var(--accent-2);
+  }
+  .masthead h1 {
+    font-size: clamp(1.9rem, 5.2vw, 2.9rem);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .masthead .lede {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    max-width: 34rem;
+    margin: 0 0 1.6rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.4rem;
+    font-size: .85rem;
+    color: var(--muted);
+    padding-top: .3rem;
+  }
+  .meta b {
+    color: var(--ink-soft);
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  /* ---------- Table of contents ---------- */
+  .toc {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.6rem 1.7rem;
+    margin: 2.4rem auto 0;
+  }
+  .toc h2 {
+    font-size: .74rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 1rem;
+    font-weight: 700;
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: .1rem;
+  }
+  .toc li { counter-increment: toc; }
+  .toc li a {
+    display: flex;
+    align-items: baseline;
+    gap: .85rem;
+    padding: .5rem .4rem;
+    border-bottom: none;
+    border-radius: 6px;
+    color: var(--ink);
+  }
+  .toc li a:hover { background: var(--chip-bg); }
+  .toc li a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+    min-width: 1.7rem;
+  }
+  .toc li.extra a::before { content: "–"; color: var(--muted); }
+
+  /* ---------- Sections ---------- */
+  section { margin-top: 3.4rem; }
+  section > h2.sec-title {
+    font-size: clamp(1.35rem, 3.6vw, 1.7rem);
+    font-weight: 800;
+    letter-spacing: -.005em;
+    line-height: 1.3;
+    margin: 0 0 1.3rem;
+    padding-bottom: .7rem;
+    border-bottom: 1px solid var(--line-strong);
+    display: flex;
+    align-items: baseline;
+    gap: .8rem;
+    scroll-margin-top: 1.5rem;
+    text-wrap: balance;
+  }
+  h2.sec-title .num {
+    font-family: var(--mono);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+  h3 {
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 2.4rem 0 .9rem;
+    line-height: 1.45;
+    scroll-margin-top: 1.5rem;
+    text-wrap: balance;
+  }
+  h4 {
+    font-size: .98rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 1.8rem 0 .6rem;
+  }
+
+  p { margin: 0 0 1.05rem; }
+  strong { font-weight: 700; color: var(--ink); }
+
+  ul, ol { margin: 0 0 1.15rem; padding-left: 1.4rem; }
+  li { margin: 0 0 .4rem; }
+  li::marker { color: var(--accent-2); }
+  ul ul, ol ol, ul ol, ol ul { margin: .4rem 0 .3rem; }
+
+  hr { display: none; }
+
+  /* callout used for standalone emphasized lines */
+  .lead-note {
+    border-left: 3px solid var(--accent-2);
+    background: color-mix(in srgb, var(--accent-2) 7%, var(--paper));
+    padding: .85rem 1.1rem;
+    border-radius: 0 8px 8px 0;
+    margin: 0 0 1.2rem;
+  }
+  .lead-note p { margin: 0; }
+
+  /* inline code */
+  p code, li code, td code, h4 code {
+    font-family: var(--mono);
+    font-size: .84em;
+    background: var(--chip-bg);
+    color: var(--code-ink);
+    padding: .1em .4em;
+    border-radius: 4px;
+    border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+    word-break: break-word;
+  }
+
+  /* ---------- Tables ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    margin: 0 0 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    background: var(--paper);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: .86rem;
+    line-height: 1.6;
+  }
+  thead th {
+    text-align: left;
+    font-weight: 700;
+    font-size: .74rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    padding: .7rem .85rem;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  :root[data-theme="dark"] thead th { color: #0d1219; }
+  @media (prefers-color-scheme: dark) {
+    thead th { color: #0d1219; }
+  }
+  :root[data-theme="light"] thead th { color: #fff; }
+  tbody td {
+    padding: .65rem .85rem;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  tbody tr:nth-child(even) { background: color-mix(in srgb, var(--ink) 2.5%, var(--paper)); }
+  tbody td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  table a { font-size: .82em; word-break: break-all; }
+
+  /* 報告一覧はタイトル列が長いため折り返しを許可する */
+  .reports table { min-width: 40rem; }
+  .reports tbody td:first-child { white-space: normal; min-width: 18rem; }
+
+  .badge {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: .12em .5em;
+    border-radius: 5px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .badge.free { color: var(--free); background: var(--free-bg); border: 1px solid color-mix(in srgb, var(--free) 30%, transparent); }
+  .badge.paid { color: var(--paid); background: var(--paid-bg); border: 1px solid color-mix(in srgb, var(--paid) 30%, transparent); }
+
+  .endnote {
+    font-size: .82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    margin-top: 1.4rem;
+    padding-top: .9rem;
+  }
+
+  footer.colophon {
+    max-width: 46rem;
+    margin: 4.5rem auto 0;
+    padding-top: 1.4rem;
+    border-top: 2px solid var(--ink);
+    font-size: .8rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .5rem;
+  }
+
+  @media (max-width: 34rem) {
+    .page { font-size: 16px; }
+    .toc { padding: 1.2rem 1.1rem; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="eyebrow">SDSC2026 &nbsp;/&nbsp; MLB 部門 資料</div>
+    <h1>過去の MLB 部門 分析報告アーカイブ</h1>
+    <p class="lede">スポーツデータサイエンスコンペティションで MLB 部門が実施された 2023年度・2025年度の報告書の目次（発表者・所属・タイトル）と、報告書本体の入手先の案内。</p>
+    <div class="meta">
+      <span><b>作成日</b>&nbsp; 2026-07-18</span>
+      <span><b>用途</b>&nbsp; SDSC2026 MLB 部門の参加者向け資料</span>
+      <span><b>関連</b>&nbsp; <a href="index.html">MLB データ収集方法の調査まとめ</a></span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <nav class="toc" aria-label="目次">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#sec-1">報告書の入手先</a></li>
+        <li><a href="#sec-2">2023年度 MLB 部門の報告一覧（4件）</a></li>
+        <li><a href="#sec-3">2025年度 MLB 部門の報告一覧（9件）</a></li>
+        <li class="extra"><a href="index.html">関連資料: MLB データ収集方法の調査まとめ</a></li>
+      </ol>
+    </nav>
+
+    <!-- ============ 1 ============ -->
+    <section id="sec-1">
+      <h2 class="sec-title"><span class="num">01</span>報告書の入手先</h2>
+
+      <p>スポーツデータサイエンスコンペティションは、日本統計学会 スポーツデータサイエンス分科会が毎年開催している。過去のコンペの報告集（各報告書をまとめた PDF）は、分科会サイトのコンペティションページに年度別に掲載されている。</p>
+
+      <ul>
+        <li><strong>分科会サイト（トップ）</strong><br>
+          <a href="https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/" target="_blank" rel="noopener">https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/</a></li>
+        <li><strong>コンペティションページ（年度別の報告集まとめ）</strong><br>
+          <a href="https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/%E3%82%B3%E3%83%B3%E3%83%9A%E3%83%86%E3%82%A3%E3%82%B7%E3%83%A7%E3%83%B3" target="_blank" rel="noopener">https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/コンペティション</a></li>
+        <li><strong>2023年度 報告集 PDF（Google Drive）</strong><br>
+          <a href="https://drive.google.com/file/d/1fOrR2rqYeqfAQXVRKfQelCrfh4l8dmxN/view?usp=sharing" target="_blank" rel="noopener">https://drive.google.com/file/d/1fOrR2rqYeqfAQXVRKfQelCrfh4l8dmxN/view</a></li>
+      </ul>
+
+      <div class="lead-note">
+        <p>MLB 部門が実施されたのは <strong>2023年度</strong> と <strong>2025年度</strong> の2回。2025年度の報告集は、2026年7月時点ではコンペティションページに 2024年度分まで掲載のため、公開され次第上記コンペティションページから入手できる。</p>
+      </div>
+
+      <p>各年度のコンペ本体のウェブサイト（審査会プログラム・審査結果など）は次のとおり。</p>
+      <ul>
+        <li>2023年度: <a href="https://2023.sports.ywebsys.net" target="_blank" rel="noopener">https://2023.sports.ywebsys.net</a></li>
+        <li>2025年度: <a href="https://sports.ywebsys.net" target="_blank" rel="noopener">https://sports.ywebsys.net</a></li>
+      </ul>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section id="sec-2">
+      <h2 class="sec-title"><span class="num">02</span>2023年度 MLB 部門の報告一覧（4件）</h2>
+
+      <p>2023年度（第11回スポーツデータ解析コンペティション）の MLB 部門では、次の4件の報告があった。大谷翔平選手を題材にした分析が2件、投手の安定度・ルール改正の影響分析が各1件である。</p>
+
+      <div class="table-scroll reports">
+        <table>
+          <thead>
+            <tr><th>タイトル</th><th>発表者</th><th>所属</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>先発投手の安定度について</td>
+              <td>加瀬 稔弥・山本 義郎</td>
+              <td>東海大学</td>
+            </tr>
+            <tr>
+              <td>MLB のルール改正による攻守への影響 〜シフト禁止によるトレンドの変化〜</td>
+              <td>瀧柳 祐介・二ノ宮 碧・織田 大志・廣津 信義</td>
+              <td>順天堂大学・富士ソフト株式会社</td>
+            </tr>
+            <tr>
+              <td>投手・大谷翔平に対する Run Value に基づいた打線編成</td>
+              <td>金田 大輝・江頭 健斗・松澤 智史・田畑 耕治</td>
+              <td>東京理科大学</td>
+            </tr>
+            <tr>
+              <td>客観的総合指数から見る大谷翔平選手の客観的な凄さ</td>
+              <td>助田 一晟</td>
+              <td>東京大学</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section id="sec-3">
+      <h2 class="sec-title"><span class="num">03</span>2025年度 MLB 部門の報告一覧（9件）</h2>
+
+      <p>2025年度の MLB 部門では、次の9件の報告があった。因果推論・機械学習・映像解析といった手法面の広がりに加え、贅沢税やサラリーキャップなど制度・経済面の分析も登場している。</p>
+
+      <div class="table-scroll reports">
+        <table>
+          <thead>
+            <tr><th>タイトル</th><th>発表者</th><th>所属</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pose-based Action Recognition による MLB ホームランダービー投打映像からの本塁打成否予測</td>
+              <td>稲福 力也・北島 栄司・廣瀬 颯・宮田 龍太</td>
+              <td>琉球大学</td>
+            </tr>
+            <tr>
+              <td>打者と投手タイプの相性分析</td>
+              <td>村上 雅基・尼﨑 太樹</td>
+              <td>熊本大学</td>
+            </tr>
+            <tr>
+              <td>MLB における盗塁の戦術的価値 ―得点期待値・得点効率・打者成績からの検証―</td>
+              <td>谷川 瑞樹・宮本 道子</td>
+              <td>長崎大学</td>
+            </tr>
+            <tr>
+              <td>MLB 先発投手の投球特性の可視化と指導支援</td>
+              <td>加瀬 稔弥・山本 義郎</td>
+              <td>東海大学</td>
+            </tr>
+            <tr>
+              <td>ペナルティ型課税と意図せざる影響：MLB 贅沢税がもたらす競争構造と市場行動の分析</td>
+              <td>周 娟・谷津 唯希</td>
+              <td>東京都市大学</td>
+            </tr>
+            <tr>
+              <td>野球における新たな勝利貢献指標『xWinShare』の提案 ―XGBoost による MLB トラッキングデータ分析―</td>
+              <td>河地 優馬・大浦 さやか・中西 凛・リャン ジャチー・渡波 正晴・新谷 幸弘</td>
+              <td>千葉工業大学</td>
+            </tr>
+            <tr>
+              <td>MLB 各球団にサラリーキャップ制度を導入した場合の変化</td>
+              <td>猶江 健心・山口 敦子</td>
+              <td>東京都市大学</td>
+            </tr>
+            <tr>
+              <td>打席内投球系列を考慮した因果推論による捕手の投球戦略評価</td>
+              <td>三浦 拓実・藤井 慶輔</td>
+              <td>名古屋大学</td>
+            </tr>
+            <tr>
+              <td>MLB における球場特性の定量評価と変動要因の分析 BPF、HRF、X2B および年次安定性に基づく研究</td>
+              <td>松島 沙季・石田 優利亜・高梨 春菜・西村 凌平・安藤 雅和</td>
+              <td>千葉工業大学</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>インフォグラフィック部門の MLB 作品</h3>
+      <p>2025年度は報告書のほかに、インフォグラフィック部門にも MLB を題材とした作品が1件あった。</p>
+      <div class="table-scroll reports">
+        <table>
+          <thead>
+            <tr><th>タイトル</th><th>発表者</th><th>所属</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>投手ごとの“癖”が見える ― MLB 配球パターン図鑑</td>
+              <td>川ノ上 裕太・髙橋 旺伸・中深迫 信一</td>
+              <td>情報科学専門学校</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="endnote">発表者・所属・タイトルは各報告書 PDF の1ページ目および 2025年度審査会プログラムからの転記。所属は大学（学校）名までに簡略化している。</p>
+    </section>
+
+  </div>
+
+  <footer class="colophon">
+    <span>過去の MLB 部門 分析報告アーカイブ</span>
+    <span>SDSC2026 &nbsp;/&nbsp; 作成日 2026-07-18</span>
+  </footer>
+
+</div>
