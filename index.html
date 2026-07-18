@@ -449,9 +449,89 @@
     .page { font-size: 16px; }
     .toc { padding: 1.2rem 1.1rem; }
   }
+
+  /* ---------- Site sidebar ---------- */
+  .sidenav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 16rem;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    padding: 2.6rem 1.4rem 2rem;
+    overflow-y: auto;
+    z-index: 10;
+  }
+  .sidenav .brand {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    line-height: 1.7;
+    margin-bottom: 1.8rem;
+  }
+  .sidenav .label {
+    font-size: .72rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin: 0 0 .7rem;
+  }
+  .sidenav a.nav-item {
+    display: block;
+    padding: .55rem .7rem;
+    border-radius: 6px;
+    border-bottom: none;
+    color: var(--ink-soft);
+    font-size: .87rem;
+    line-height: 1.5;
+    margin-bottom: .3rem;
+  }
+  .sidenav a.nav-item:hover { background: var(--chip-bg); color: var(--ink); }
+  .sidenav a.nav-item.current {
+    background: color-mix(in srgb, var(--accent) 10%, var(--paper));
+    color: var(--accent);
+    font-weight: 700;
+    border-left: 3px solid var(--accent-2);
+    border-radius: 0 6px 6px 0;
+  }
+  @media (min-width: 75rem) {
+    .page { padding-left: 18.5rem; }
+  }
+  @media (max-width: 74.99rem) {
+    .sidenav {
+      position: static;
+      width: auto;
+      max-width: 46rem;
+      margin: 1.8rem auto 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: .9rem 1.1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .3rem .9rem;
+      overflow: visible;
+    }
+    .sidenav .brand { display: none; }
+    .sidenav .label { margin: 0; }
+    .sidenav a.nav-item { margin: 0; padding: .3rem .6rem; }
+    .sidenav a.nav-item.current { border-left: none; border-radius: 6px; }
+  }
 </style>
 
 <div class="page">
+
+  <nav class="sidenav" aria-label="サイト内ページ">
+    <div class="brand">SDSC2026<br>MLB 部門 資料</div>
+    <p class="label">サイト内ページ</p>
+    <a class="nav-item current" href="index.html" aria-current="page">MLB データ収集方法の調査まとめ</a>
+    <a class="nav-item" href="past-reports.html">過去の分析報告アーカイブ</a>
+  </nav>
 
   <header class="masthead">
     <div class="eyebrow">SDSC2026 &nbsp;/&nbsp; MLB 部門 資料</div>
