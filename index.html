@@ -1,0 +1,1281 @@
+<title>MLB データ収集方法の調査まとめ（SDSC2026）</title>
+<style>
+  :root {
+    --bg: #f4f2ec;
+    --paper: #ffffff;
+    --ink: #1b2430;
+    --ink-soft: #3d4756;
+    --muted: #6c7480;
+    --accent: #1c3d5a;
+    --accent-2: #b5502e;
+    --line: #e0dbcf;
+    --line-strong: #cdc7b8;
+    --free: #2f7d5b;
+    --free-bg: #e7f1ea;
+    --paid: #a9781a;
+    --paid-bg: #f6ecd6;
+    --code-bg: #f2f0e9;
+    --code-ink: #253040;
+    --chip-bg: #eae6da;
+    --link: #1c5480;
+    --shadow: 0 1px 2px rgba(27, 36, 48, .06), 0 8px 28px rgba(27, 36, 48, .05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10141a;
+      --paper: #191f28;
+      --ink: #e7e9ee;
+      --ink-soft: #b9c1cd;
+      --muted: #8b95a3;
+      --accent: #7fb0d8;
+      --accent-2: #e08a5f;
+      --line: #2a323d;
+      --line-strong: #3a444f;
+      --free: #64c79a;
+      --free-bg: #16302a;
+      --paid: #d9ad5e;
+      --paid-bg: #33290f;
+      --code-bg: #12171f;
+      --code-ink: #cdd6e2;
+      --chip-bg: #262f3a;
+      --link: #86bce8;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .28);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f2ec;
+    --paper: #ffffff;
+    --ink: #1b2430;
+    --ink-soft: #3d4756;
+    --muted: #6c7480;
+    --accent: #1c3d5a;
+    --accent-2: #b5502e;
+    --line: #e0dbcf;
+    --line-strong: #cdc7b8;
+    --free: #2f7d5b;
+    --free-bg: #e7f1ea;
+    --paid: #a9781a;
+    --paid-bg: #f6ecd6;
+    --code-bg: #f2f0e9;
+    --code-ink: #253040;
+    --chip-bg: #eae6da;
+    --link: #1c5480;
+    --shadow: 0 1px 2px rgba(27, 36, 48, .06), 0 8px 28px rgba(27, 36, 48, .05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #10141a;
+    --paper: #191f28;
+    --ink: #e7e9ee;
+    --ink-soft: #b9c1cd;
+    --muted: #8b95a3;
+    --accent: #7fb0d8;
+    --accent-2: #e08a5f;
+    --line: #2a323d;
+    --line-strong: #3a444f;
+    --free: #64c79a;
+    --free-bg: #16302a;
+    --paid: #d9ad5e;
+    --paid-bg: #33290f;
+    --code-bg: #12171f;
+    --code-ink: #cdd6e2;
+    --chip-bg: #262f3a;
+    --link: #86bce8;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .28);
+  }
+
+  * { box-sizing: border-box; }
+
+  body,
+  .page {
+    --sans: system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+      "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", "Meiryo", sans-serif;
+    --mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", "Consolas",
+      "Menlo", "Roboto Mono", ui-monospace, monospace;
+  }
+
+  .page {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding: 0 1.25rem 5rem;
+    overflow-wrap: break-word;
+  }
+
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+  }
+
+  a {
+    color: var(--link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--link) 35%, transparent);
+    transition: border-color .15s ease, color .15s ease;
+  }
+  a:hover { border-bottom-color: var(--link); }
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 3.5rem 0 2rem;
+    border-bottom: 2px solid var(--ink);
+    position: relative;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 1.1rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.6rem;
+    height: 2px;
+    background: var(--accent-2);
+  }
+  .masthead h1 {
+    font-size: clamp(1.9rem, 5.2vw, 2.9rem);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .masthead .lede {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    max-width: 34rem;
+    margin: 0 0 1.6rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.4rem;
+    font-size: .85rem;
+    color: var(--muted);
+    padding-top: .3rem;
+  }
+  .meta b {
+    color: var(--ink-soft);
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  /* ---------- Table of contents ---------- */
+  .toc {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.6rem 1.7rem;
+    margin: 2.4rem auto 0;
+  }
+  .toc h2 {
+    font-size: .74rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 1rem;
+    font-weight: 700;
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: .1rem;
+  }
+  .toc li { counter-increment: toc; }
+  .toc li a {
+    display: flex;
+    align-items: baseline;
+    gap: .85rem;
+    padding: .5rem .4rem;
+    border-bottom: none;
+    border-radius: 6px;
+    color: var(--ink);
+  }
+  .toc li a:hover { background: var(--chip-bg); }
+  .toc li a::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+    min-width: 1.7rem;
+  }
+  .toc li.extra a::before { content: "–"; color: var(--muted); }
+
+  /* ---------- Sections ---------- */
+  section { margin-top: 3.4rem; }
+  section > h2.sec-title {
+    font-size: clamp(1.35rem, 3.6vw, 1.7rem);
+    font-weight: 800;
+    letter-spacing: -.005em;
+    line-height: 1.3;
+    margin: 0 0 1.3rem;
+    padding-bottom: .7rem;
+    border-bottom: 1px solid var(--line-strong);
+    display: flex;
+    align-items: baseline;
+    gap: .8rem;
+    scroll-margin-top: 1.5rem;
+    text-wrap: balance;
+  }
+  h2.sec-title .num {
+    font-family: var(--mono);
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+  h3 {
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 2.4rem 0 .9rem;
+    line-height: 1.45;
+    scroll-margin-top: 1.5rem;
+    text-wrap: balance;
+  }
+  h4 {
+    font-size: .98rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 1.8rem 0 .6rem;
+  }
+
+  p { margin: 0 0 1.05rem; }
+  strong { font-weight: 700; color: var(--ink); }
+
+  ul, ol { margin: 0 0 1.15rem; padding-left: 1.4rem; }
+  li { margin: 0 0 .4rem; }
+  li::marker { color: var(--accent-2); }
+  ul ul, ol ol, ul ol, ol ul { margin: .4rem 0 .3rem; }
+
+  hr { display: none; }
+
+  /* callout used for standalone emphasized lines */
+  .lead-note {
+    border-left: 3px solid var(--accent-2);
+    background: color-mix(in srgb, var(--accent-2) 7%, var(--paper));
+    padding: .85rem 1.1rem;
+    border-radius: 0 8px 8px 0;
+    margin: 0 0 1.2rem;
+  }
+  .lead-note p { margin: 0; }
+
+  /* ---------- Code ---------- */
+  .code {
+    margin: 0 0 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--code-bg);
+    box-shadow: var(--shadow);
+  }
+  .code figcaption {
+    font-family: var(--mono);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: .5rem .95rem;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--ink) 4%, var(--code-bg));
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .code figcaption::before {
+    content: "";
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    background: var(--accent-2);
+    flex: none;
+  }
+  .code pre {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .82rem;
+    line-height: 1.65;
+    color: var(--code-ink);
+    -webkit-font-smoothing: auto;
+  }
+  .code code { font-family: inherit; }
+
+  /* inline code */
+  p code, li code, td code, h4 code {
+    font-family: var(--mono);
+    font-size: .84em;
+    background: var(--chip-bg);
+    color: var(--code-ink);
+    padding: .1em .4em;
+    border-radius: 4px;
+    border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+    word-break: break-word;
+  }
+
+  /* ---------- Tables ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    margin: 0 0 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    background: var(--paper);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: .86rem;
+    line-height: 1.6;
+  }
+  thead th {
+    text-align: left;
+    font-weight: 700;
+    font-size: .74rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    padding: .7rem .85rem;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  :root[data-theme="dark"] thead th { color: #0d1219; }
+  @media (prefers-color-scheme: dark) {
+    thead th { color: #0d1219; }
+  }
+  :root[data-theme="light"] thead th { color: #fff; }
+  tbody td {
+    padding: .65rem .85rem;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  tbody tr:nth-child(even) { background: color-mix(in srgb, var(--ink) 2.5%, var(--paper)); }
+  tbody td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  table a { font-size: .82em; word-break: break-all; }
+
+  .badge {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: .12em .5em;
+    border-radius: 5px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .badge.free { color: var(--free); background: var(--free-bg); border: 1px solid color-mix(in srgb, var(--free) 30%, transparent); }
+  .badge.paid { color: var(--paid); background: var(--paid-bg); border: 1px solid color-mix(in srgb, var(--paid) 30%, transparent); }
+
+  /* Source list */
+  .sources {
+    columns: 2;
+    column-gap: 2rem;
+    font-size: .82rem;
+    padding-left: 0;
+    list-style: none;
+  }
+  .sources li {
+    break-inside: avoid;
+    margin-bottom: .5rem;
+    padding-left: .9rem;
+    position: relative;
+  }
+  .sources li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .62em;
+    width: .32rem;
+    height: .32rem;
+    background: var(--accent-2);
+    border-radius: 50%;
+  }
+  .sources a { word-break: break-all; }
+  @media (max-width: 34rem) {
+    .sources { columns: 1; }
+  }
+
+  .endnote {
+    font-size: .82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    margin-top: 1.4rem;
+    padding-top: .9rem;
+  }
+
+  footer.colophon {
+    max-width: 46rem;
+    margin: 4.5rem auto 0;
+    padding-top: 1.4rem;
+    border-top: 2px solid var(--ink);
+    font-size: .8rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .5rem;
+  }
+
+  @media (max-width: 34rem) {
+    .page { font-size: 16px; }
+    .toc { padding: 1.2rem 1.1rem; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="eyebrow">SDSC2026 &nbsp;/&nbsp; MLB 部門 資料</div>
+    <h1>MLB データ収集方法の調査まとめ</h1>
+    <p class="lede">スポーツデータサイエンスコンペティション MLB 部門の紹介動画・参加者向け資料のための、データ収集手法の調査整理。</p>
+    <div class="meta">
+      <span><b>作成日</b>&nbsp; 2026-07-11</span>
+      <span><b>用途</b>&nbsp; SDSC（スポーツデータサイエンスコンペティション）MLB 部門の紹介動画・参加者向け資料</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <nav class="toc" aria-label="目次">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#sec-1">概要: MLB データの3系統</a></li>
+        <li><a href="#sec-2">Python でのデータ収集方法</a></li>
+        <li><a href="#sec-3">R でのデータ収集方法</a></li>
+        <li><a href="#sec-4">その他の手法（API 直叩き・CSV・スクレイピング）</a></li>
+        <li><a href="#sec-5">よく使われている MLB データサイト一覧</a></li>
+        <li><a href="#sec-6">けが・手術データ（トミー・ジョン手術・IL）</a></li>
+        <li><a href="#sec-7">コンペ運営向け推奨</a></li>
+        <li class="extra"><a href="#sec-appendix">付録: 公式ドキュメント早見表</a></li>
+        <li class="extra"><a href="#sec-sources">主な情報源</a></li>
+      </ol>
+    </nav>
+
+    <!-- ============ 1 ============ -->
+    <section id="sec-1">
+      <h2 class="sec-title"><span class="num">01</span>概要: MLB データの3系統</h2>
+
+      <p>2025〜2026年時点の MLB データ収集は、次の3系統に分けると整理しやすい。</p>
+
+      <ol>
+        <li><strong>Statcast / Baseball Savant 系</strong><br>
+          投球1球単位のトラッキングデータ（球速・回転数・打球速度・打球角度・xwOBA・スイング速度など約118項目）。MLB 公式の Baseball Savant から CSV 取得でき、Python/R ライブラリも主にここを利用する。MLB 公式用語集では Statcast を「大量の野球データを収集・分析する追跡技術」と説明している（<a href="https://www.mlb.com/glossary/statcast" target="_blank" rel="noopener">https://www.mlb.com/glossary/statcast</a> ）。データは2008年以降（打球トラッキングの充実は2015年以降）。</li>
+
+        <li><strong>MLB Stats API 系</strong><br>
+          試合日程・ロースター・選手情報・ライブゲームフィード・ボックススコア・プレイ単位データなど。API キー不要の公開 JSON API で、コミュニティ製ラッパー（MLB-StatsAPI 等）経由で使われることが多い。公式に長期安定保証された研究用 API とは言いにくい点に注意。</li>
+
+        <li><strong>集計済み・歴史データ系</strong><br>
+          FanGraphs・Baseball-Reference・Retrosheet・Lahman Database など。WAR・wRC+・FIP、過去シーズン成績、プレイバイプレイ、歴史的データの分析に向く。Retrosheet は2025年時点で1910〜2025年の AL/NL プレイバイプレイを収録している。</li>
+      </ol>
+
+      <p>大学生向けコンペでは、<strong>初心者には Baseball Savant CSV または pybaseball / baseballr、発展課題には MLB Stats API、歴史分析には Lahman・Retrosheet</strong> という切り分けが実用的である。</p>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section id="sec-2">
+      <h2 class="sec-title"><span class="num">02</span>Python でのデータ収集方法</h2>
+
+      <h3 id="sec-2-1">2.1 pybaseball（定番・最有力）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>GitHub: <a href="https://github.com/jldbc/pybaseball" target="_blank" rel="noopener">https://github.com/jldbc/pybaseball</a></li>
+            <li>docs ディレクトリ（Statcast 解説）: <a href="https://github.com/jldbc/pybaseball/blob/master/docs/statcast.md" target="_blank" rel="noopener">https://github.com/jldbc/pybaseball/blob/master/docs/statcast.md</a></li>
+          </ul>
+        </li>
+        <li>Baseball Savant（Statcast）・Baseball Reference・FanGraphs をまとめてスクレイピングしてくれるパッケージで、MLB データ収集の事実上の標準。Statcast、投手・打者成績、順位、表彰データなどを取得でき、投球単位からシーズン集計まで扱える。</li>
+        <li>投球1球単位の Statcast データを pandas DataFrame で取得できる。</li>
+        <li>Baseball Savant 側に1クエリ30,000行の制限があるが、pybaseball が自動で分割リクエストして結合してくれる。</li>
+      </ul>
+
+      <p><strong>向いている用途</strong>: Statcast の投球単位データ取得／FanGraphs の打者・投手成績取得／Baseball-Reference 系データ取得／初心者向けのデータ取得演習</p>
+
+      <p><strong>注意点</strong></p>
+      <ul>
+        <li>内部的には Web サイトや CSV エンドポイントへのアクセスに依存するため、サイト仕様変更で動かなくなることがある。</li>
+        <li>Statcast は行数が多く、長期間を一度に取得すると時間がかかる。</li>
+      </ul>
+
+      <p><strong>コード例</strong></p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code># pip install pybaseball pandas
+
+from pybaseball import statcast, statcast_batter, playerid_lookup
+from pybaseball import batting_stats, pitching_stats
+
+# 期間指定で全球データ取得（team 指定も可）
+data = statcast('2025-08-01', '2025-08-07')
+sc_lad = statcast("2025-04-01", "2025-04-07", team="LAD")
+
+# 選手IDを調べて特定打者のデータ取得（例: 大谷翔平）
+pid = playerid_lookup('ohtani', 'shohei')  # key_mlbam を確認
+ohtani = statcast_batter('2025-04-01', '2025-09-30', player_id=660271)
+
+# シーズン打撃・投手成績（FanGraphs 由来）
+bat = batting_stats(2025, qual=100)
+print(bat[["Name", "Team", "PA", "HR", "AVG", "OBP", "SLG", "WAR"]].head())
+
+pit = pitching_stats(2025, qual=50)
+print(pit[["Name", "Team", "IP", "ERA", "FIP", "WAR"]].head())</code></pre>
+      </figure>
+
+      <h3 id="sec-2-2">2.2 MLB-StatsAPI（公式 Stats API のラッパー）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>GitHub: <a href="https://github.com/toddrob99/MLB-StatsAPI" target="_blank" rel="noopener">https://github.com/toddrob99/MLB-StatsAPI</a></li>
+            <li>Wiki（エンドポイント一覧）: <a href="https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints" target="_blank" rel="noopener">https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints</a></li>
+            <li>PyPI: <a href="https://pypi.org/project/MLB-StatsAPI/" target="_blank" rel="noopener">https://pypi.org/project/MLB-StatsAPI/</a></li>
+          </ul>
+        </li>
+        <li>MLB 公式の Stats API（statsapi.mlb.com）の Python ラッパー。<strong>API キー不要・無料</strong>（<code>pip install MLB-StatsAPI</code>）。2025年4月に 1.9.0 がリリースされており、メンテが続いている。</li>
+        <li>試合スケジュール・スコア・ボックススコア・ラインスコア・選手成績・順位表・ロースター・ライブゲームデータの取得に強い。試合 ID <code>gamePk</code> を使った詳細取得ができる。</li>
+      </ul>
+
+      <p><strong>注意点</strong></p>
+      <ul>
+        <li>pybaseball よりも「公式試合情報・ライブデータ」に強い。Statcast の詳細な打球・投球トラッキング分析は pybaseball や Baseball Savant の方が使いやすい。</li>
+        <li>PyPI ページにも、MLB や球団とは非提携であり、データ利用は MLB 側の notice に従う旨が書かれている。</li>
+      </ul>
+
+      <p><strong>コード例</strong></p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code># pip install MLB-StatsAPI
+
+import statsapi
+
+# 試合日程・順位表
+sched = statsapi.schedule(start_date='2025-07-01', end_date='2025-07-07')
+standings = statsapi.standings(season=2025)
+
+# 2026年4月1日のMLB試合日程 → gamePk でボックススコア
+games = statsapi.schedule(start_date="2026-04-01", end_date="2026-04-01", sportId=1)
+for g in games[:5]:
+    print(g["game_id"], g["away_name"], "vs", g["home_name"], g["status"])
+
+game_pk = games[0]["game_id"]
+box = statsapi.boxscore_data(game_pk)
+print(box["teamInfo"])</code></pre>
+      </figure>
+
+      <h3 id="sec-2-3">2.3 python-mlb-statsapi（新しめの公式 API ラッパー）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>GitHub: <a href="https://github.com/zero-sum-seattle/python-mlb-statsapi" target="_blank" rel="noopener">https://github.com/zero-sum-seattle/python-mlb-statsapi</a></li>
+          </ul>
+        </li>
+        <li>Pydantic モデルでデータ検証されており、snake_case の Python らしい API。チーム・選手・スタッツを型安全に扱える。</li>
+      </ul>
+
+      <h3 id="sec-2-4">2.4 その他の Python パッケージ</h3>
+      <ul>
+        <li><strong>baseball_scraper</strong> — pybaseball 系の派生
+          <ul>
+            <li>公式ドキュメント: <a href="https://github.com/spilchen/baseball_scraper" target="_blank" rel="noopener">https://github.com/spilchen/baseball_scraper</a></li>
+          </ul>
+        </li>
+        <li><strong>baseball-stats-python</strong> — 比較的新しい軽量パッケージ
+          <ul>
+            <li>公式ドキュメント: <a href="https://pypi.org/project/baseball-stats-python/" target="_blank" rel="noopener">https://pypi.org/project/baseball-stats-python/</a></li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section id="sec-3">
+      <h2 class="sec-title"><span class="num">03</span>R でのデータ収集方法</h2>
+
+      <h3 id="sec-3-1">3.1 baseballr（定番・最有力）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>pkgdown サイト: <a href="https://billpetti.github.io/baseballr/" target="_blank" rel="noopener">https://billpetti.github.io/baseballr/</a></li>
+            <li>CRAN: <a href="https://cran.r-project.org/web/packages/baseballr/index.html" target="_blank" rel="noopener">https://cran.r-project.org/web/packages/baseballr/index.html</a></li>
+            <li>関数リファレンス例: <a href="https://billpetti.github.io/baseballr/reference/statcast_search.html" target="_blank" rel="noopener">statcast_search</a> ／ <a href="https://billpetti.github.io/baseballr/reference/fg_batter_leaders.html" target="_blank" rel="noopener">fg_batter_leaders</a> ／ <a href="https://billpetti.github.io/baseballr/reference/mlb_schedule.html" target="_blank" rel="noopener">mlb_schedule</a> ／ <a href="https://billpetti.github.io/baseballr/reference/retrosheet_data.html" target="_blank" rel="noopener">retrosheet_data</a></li>
+          </ul>
+        </li>
+        <li>Bill Petti 作。R で MLB データを取得する中心的パッケージ。MLB Stats API・Baseball Savant（Statcast）・FanGraphs・Baseball Reference・Retrosheet・Chadwick 登録簿（選手 ID 変換）・NCAA（大学野球）・ESPN など広範なソースに対応。</li>
+        <li>wOBA・FIP などセイバーメトリクス指標の計算関数も同梱。CRAN 版は 2026-05 にも更新されており、現在もメンテが続いている。</li>
+        <li><code>statcast_search()</code> は日付・選手 ID・打者/投手指定ができ、返り値には投球種・球速・打球速度・xwOBA・スイング速度など多数の列が含まれる。<code>mlb_schedule()</code> は MLB およびマイナー等の <code>game_pk</code> を取得できる（MLB は <code>sport_id = 1</code>）。</li>
+      </ul>
+
+      <p><strong>コード例</strong></p>
+      <figure class="code">
+        <figcaption>r</figcaption>
+        <pre><code># install.packages("baseballr")
+library(baseballr)
+library(dplyr)
+
+# Statcast: 期間指定の全球データ
+sc <- statcast_search(start_date = "2025-04-01", end_date = "2025-04-07")
+sc %>%
+  select(game_date, player_name, pitch_type, release_speed, events) %>%
+  head()
+
+# Statcast: 特定打者の期間データ（例: 大谷翔平）
+ohtani <- statcast_search_batter(
+  start_date = "2025-04-01", end_date = "2025-09-30",
+  batterid = 660271
+)
+
+# MLB Stats API: 1試合の全投球データ (play-by-play)
+pbp <- mlb_pbp(game_pk = 745340)
+
+# MLB Stats API: 日程・game_pk 取得
+schedule <- mlb_schedule(season = 2026, level_ids = "1")  # MLB
+
+# FanGraphs: シーズン打撃リーダー
+bat <- fg_batter_leaders(startseason = 2025, endseason = 2025)
+bat %>%
+  select(Season, PlayerName, team_name, PA, HR, AVG, OBP, SLG, WAR) %>%
+  head()</code></pre>
+      </figure>
+
+      <h3 id="sec-3-2">3.2 sabRmetrics（新興・研究者発）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>pkgdown サイト: <a href="https://saberpowers.github.io/sabRmetrics/" target="_blank" rel="noopener">https://saberpowers.github.io/sabRmetrics/</a></li>
+            <li>GitHub: <a href="https://github.com/saberpowers/sabRmetrics" target="_blank" rel="noopener">https://github.com/saberpowers/sabRmetrics</a></li>
+          </ul>
+        </li>
+        <li>元 Dodgers アナリストの Scott Powers 作（2024年公開）。Baseball Savant と MLB Stats API からのダウンロードに特化し、正規化された複数テーブルで返す設計。</li>
+        <li>投手のアームアングルなど最新の公開項目にも追随。塁・アウト状況ごとの得点期待値やカウント価値の推定、投球軌道の復元など研究向け機能あり。</li>
+        <li>インストール: <code>devtools::install_github("saberpowers/sabRmetrics")</code></li>
+      </ul>
+      <figure class="code">
+        <figcaption>r</figcaption>
+        <pre><code>data <- sabRmetrics::download_baseballsavant(
+  start_date = "2025-07-01", end_date = "2025-07-07"
+)</code></pre>
+      </figure>
+
+      <h3 id="sec-3-3">3.3 Lahman パッケージ（歴史データ）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>CRAN: <a href="https://cran.r-project.org/package=Lahman" target="_blank" rel="noopener">https://cran.r-project.org/package=Lahman</a></li>
+            <li>CRAN リファレンスマニュアル: <a href="https://cloud.r-project.org/web/packages/Lahman/Lahman.pdf" target="_blank" rel="noopener">https://cloud.r-project.org/web/packages/Lahman/Lahman.pdf</a></li>
+            <li>生データ配布元（SABR）: <a href="https://sabr.org/lahman-database/" target="_blank" rel="noopener">https://sabr.org/lahman-database/</a></li>
+          </ul>
+        </li>
+        <li>1871年以降の打撃・投手・守備・順位・チーム成績を収録した Lahman Database の R パッケージ版。インストールするだけで data.frame として使えるため、初学者の演習素材として最適。SQL/データベース教育や正規化されたテーブル構造の学習、長期トレンド分析にも向く。</li>
+        <li><strong>収録年に関する注記（両調査の食い違いの整理）</strong>: CRAN パッケージ版 <code>Lahman</code> 14.0-0 は「1871〜2024年」を収録する一方、SABR で配布される生データの2025年版（2026-01-02 リリース）は「1871〜2025年」を収録する。パッケージ版への最新シーズン反映はリリースサイクルの都合で遅れるため、両方の記述は矛盾せず両立する。最新シーズンが必要な場合は SABR 配布の生データ（CSV/SQLite）を使う。</li>
+        <li>Statcast のような1球単位・打球速度・回転数データは含まない。</li>
+      </ul>
+
+      <p><strong>コード例</strong></p>
+      <figure class="code">
+        <figcaption>r</figcaption>
+        <pre><code># install.packages("Lahman")
+library(Lahman)
+library(dplyr)
+
+# 2024年の打者本塁打ランキング
+Batting %>%
+  filter(yearID == 2024) %>%
+  group_by(playerID) %>%
+  summarise(HR = sum(HR), AB = sum(AB), .groups = "drop") %>%
+  arrange(desc(HR)) %>%
+  left_join(People, by = "playerID") %>%
+  select(playerID, nameFirst, nameLast, AB, HR) %>%
+  head(10)</code></pre>
+      </figure>
+
+      <h3 id="sec-3-4">3.4 baseballr + Retrosheet（プレイ単位の歴史分析）</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>Retrosheet 本体: <a href="https://www.retrosheet.org/" target="_blank" rel="noopener">https://www.retrosheet.org/</a></li>
+            <li>baseballr の関数: <a href="https://billpetti.github.io/baseballr/reference/retrosheet_data.html" target="_blank" rel="noopener">https://billpetti.github.io/baseballr/reference/retrosheet_data.html</a></li>
+          </ul>
+        </li>
+        <li>Retrosheet は長期のプレイバイプレイ・ボックススコアデータを提供する重要ソース。<code>baseballr::retrosheet_data()</code> で取得・整形できるが、Chadwick CLI の <code>cwevent</code> が事前に必要（公式ドキュメントに明記）。</li>
+        <li>打席・プレイ単位の歴史分析、得点期待値・勝率期待値・走塁・守備イベント分析、Statcast 以前の時代を含む分析に向く。</li>
+      </ul>
+
+      <h4>Chadwick CLI のインストール方法</h4>
+      <ul>
+        <li>Chadwick は Retrosheet のイベントファイルを CSV に展開するコマンドラインツール群（<code>cwevent</code>・<code>cwgame</code>・<code>cwbox</code> など）。T. L. Turocy 氏（Chadwick Baseball Bureau）作。</li>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>GitHub: <a href="https://github.com/chadwickbureau/chadwick" target="_blank" rel="noopener">https://github.com/chadwickbureau/chadwick</a></li>
+            <li>マニュアル: <a href="https://chadwick.readthedocs.io/" target="_blank" rel="noopener">https://chadwick.readthedocs.io/</a></li>
+          </ul>
+        </li>
+        <li><strong>Windows</strong>: GitHub の Releases ページ（<a href="https://github.com/chadwickbureau/chadwick/releases" target="_blank" rel="noopener">https://github.com/chadwickbureau/chadwick/releases</a>）にビルド済みバイナリ（zip）が配布されている。展開して <code>cwevent.exe</code> 等のあるフォルダを PATH に通す。</li>
+        <li><strong>Mac / Linux</strong>: ソースからビルドする（autotools 標準の手順: <code>./configure</code> → <code>make</code> → <code>sudo make install</code>）。</li>
+        <li>インストール確認は R から <code>baseballr::chadwick_path()</code> が使える（<a href="https://billpetti.github.io/baseballr/reference/chadwick_path.html" target="_blank" rel="noopener">https://billpetti.github.io/baseballr/reference/chadwick_path.html</a>）。<code>cwevent</code> が見つかる状態になっていれば <code>retrosheet_data()</code> が動く。</li>
+      </ul>
+      <figure class="code">
+        <figcaption>r</figcaption>
+        <pre><code>library(baseballr)
+
+# Chadwick CLI を事前にインストールしておく（上記参照）
+chadwick_path()  # インストール確認
+
+retro <- retrosheet_data(years_to_acquire = 2024)
+events_2024 <- retro$events
+head(events_2024)</code></pre>
+      </figure>
+
+      <h3 id="sec-3-5">3.5 参考ブログ</h3>
+      <ul>
+        <li>Exploring Baseball Data with R: <a href="https://baseballwithr.wordpress.com/" target="_blank" rel="noopener">https://baseballwithr.wordpress.com/</a> — baseballr / sabRmetrics / Retrosheet の実践記事が豊富（『Analyzing Baseball Data with R』著者陣）。</li>
+      </ul>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section id="sec-4">
+      <h2 class="sec-title"><span class="num">04</span>その他の手法（API 直叩き・CSV ダウンロード・スクレイピング）</h2>
+
+      <h3 id="sec-4-1">4.1 MLB Stats API を直接叩く</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>API ドキュメント: <a href="https://docs.statsapi.mlb.com/" target="_blank" rel="noopener">https://docs.statsapi.mlb.com/</a></li>
+            <li>エンドポイントベース: <a href="https://statsapi.mlb.com/" target="_blank" rel="noopener">https://statsapi.mlb.com/</a></li>
+            <li>エンドポイント整理（MLB-StatsAPI Wiki）: <a href="https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints" target="_blank" rel="noopener">https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints</a></li>
+          </ul>
+        </li>
+        <li>API キー不要の JSON API。<code>requests</code>（Python）や <code>httr2</code>（R）で直接取得可能。ラッパーに無い項目もこれで取れる。<code>meta</code> エンドポイントでは awards・eventTypes・gameStatus・pitchTypes・positions などの値を取得できる。</li>
+        <li>ライブラリに依存しない直叩きは、「API とは何か」を教える教材、必要な項目だけの抽出、ライブラリ不具合時の代替、再現性の高い取得スクリプト作成に有用。</li>
+        <li>利用は個人・非商用の分析用途に限る点に注意（MLB の利用規約）。</li>
+      </ul>
+
+      <p><strong>代表的なエンドポイント例</strong></p>
+      <figure class="code">
+        <figcaption>text</figcaption>
+        <pre><code>https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-04-01&endDate=2026-04-01
+https://statsapi.mlb.com/api/v1/teams?sportId=1
+https://statsapi.mlb.com/api/v1/people/{personId}
+https://statsapi.mlb.com/api/v1.1/game/{gamePk}/feed/live
+https://statsapi.mlb.com/api/v1/game/{gamePk}/boxscore</code></pre>
+      </figure>
+
+      <p><strong>コード例: 日程取得（requests + pandas）</strong></p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code># pip install requests pandas
+
+import requests
+import pandas as pd
+
+url = "https://statsapi.mlb.com/api/v1/schedule"
+params = {
+    "sportId": 1,
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-01",
+    "hydrate": "team,linescore"
+}
+
+res = requests.get(url, params=params, timeout=30)
+res.raise_for_status()
+data = res.json()
+
+rows = []
+for date_block in data.get("dates", []):
+    for game in date_block.get("games", []):
+        rows.append({
+            "gamePk": game["gamePk"],
+            "date": game["gameDate"],
+            "away": game["teams"]["away"]["team"]["name"],
+            "home": game["teams"]["home"]["team"]["name"],
+            "status": game["status"]["detailedState"],
+        })
+
+df = pd.DataFrame(rows)
+print(df.head())</code></pre>
+      </figure>
+
+      <p><strong>コード例: ライブゲームフィード取得</strong></p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code>import requests
+
+game_pk = 746001  # 実際のgamePkに置き換える
+url = f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live"
+
+data = requests.get(url, timeout=30).json()
+
+print(data["gameData"]["datetime"]["officialDate"])
+print(data["gameData"]["teams"]["away"]["name"])
+print(data["gameData"]["teams"]["home"]["name"])</code></pre>
+      </figure>
+
+      <p><strong>運営者向け注意</strong></p>
+      <ul>
+        <li>API キー不要で取得できるエンドポイントが多い一方、公式に長期安定保証された研究用 API とは言いにくい。コンペ資料では「エンドポイント仕様は変わる可能性がある」と明記するのが安全。</li>
+        <li>大量アクセスは避け、キャッシュ済み CSV を配布する方が参加者に優しい。</li>
+      </ul>
+
+      <h3 id="sec-4-2">4.2 Baseball Savant の CSV ダウンロード</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong>
+          <ul>
+            <li>Statcast Search: <a href="https://baseballsavant.mlb.com/statcast_search" target="_blank" rel="noopener">https://baseballsavant.mlb.com/statcast_search</a></li>
+            <li>CSV 仕様書（列説明）: <a href="https://baseballsavant.mlb.com/csv-docs" target="_blank" rel="noopener">https://baseballsavant.mlb.com/csv-docs</a></li>
+          </ul>
+        </li>
+        <li>Statcast Search で投球単位・試合単位・選手単位・チーム単位・シーズン単位の条件検索をし、画面から CSV を直接ダウンロードできる。<strong>プログラミング不要</strong>なので、コンペ初心者への導入として使いやすい。</li>
+        <li>CSV 仕様書には <code>pitch_type</code>・<code>game_date</code>・<code>release_speed</code> などの列説明がある。</li>
+      </ul>
+
+      <p><strong>メリット</strong>: ブラウザだけで取得できる／初心者向け／CSV をそのまま Excel・R・Python で読める／コンペ配布用データを作りやすい</p>
+
+      <p><strong>デメリット</strong>: 1クエリ30,000行の制限があり大量データは期間分割が必要／クエリ条件を記録しないと再現性が落ちる／手作業ダウンロードは更新に弱い</p>
+
+      <p><strong>CSV を読む例</strong></p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code>import pandas as pd
+df = pd.read_csv("statcast_2025_april.csv")
+print(df[["game_date", "player_name", "pitch_type", "release_speed", "launch_speed"]].head())</code></pre>
+      </figure>
+      <figure class="code">
+        <figcaption>r</figcaption>
+        <pre><code>library(readr)
+library(dplyr)
+df <- read_csv("statcast_2025_april.csv")
+df %>%
+  select(game_date, player_name, pitch_type, release_speed, launch_speed) %>%
+  head()</code></pre>
+      </figure>
+
+      <h3 id="sec-4-3">4.3 Retrosheet の CSV 一括ダウンロード</h3>
+      <ul>
+        <li><strong>公式ドキュメント:</strong> <a href="https://www.retrosheet.org/" target="_blank" rel="noopener">https://www.retrosheet.org/</a></li>
+        <li>ほぼ全史の試合の play-by-play をボランティアが復元した無料データ（1910〜2025年の AL/NL プレイバイプレイを収録）。</li>
+        <li>近年は CSV 形式での配布が始まり、専用ツール（Chadwick）なしで全シーズン一括ファイル（約1,585万レコード・約20万試合）が入手可能になった。</li>
+      </ul>
+
+      <h3 id="sec-4-4">4.4 静的データベース（一括 DL 系）</h3>
+      <ul>
+        <li><strong>Lahman Database</strong>: <a href="https://sabr.org/lahman-database/" target="_blank" rel="noopener">https://sabr.org/lahman-database/</a> — 1871年以降のシーズン集計。CSV/SQLite 配布。ニグロリーグのデータも収録。</li>
+        <li><strong>Baseball Databank（Chadwick Baseball Bureau）</strong>: <a href="https://github.com/chadwickbureau/baseballdatabank" target="_blank" rel="noopener">https://github.com/chadwickbureau/baseballdatabank</a> — Lahman 系データの Git リポジトリ版。</li>
+        <li><strong>Kaggle</strong>: <a href="https://www.kaggle.com/datasets/dalyas/lahman-baseball-database" target="_blank" rel="noopener">https://www.kaggle.com/datasets/dalyas/lahman-baseball-database</a> など、加工済みデータセット多数。</li>
+      </ul>
+
+      <h3 id="sec-4-5">4.5 Web スクレイピング</h3>
+      <p>FanGraphs・Baseball-Reference・Spotrac などの Web ページから表を読む方法。</p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code>import pandas as pd
+
+url = "https://www.baseball-reference.com/leagues/majors/2025-standard-batting.shtml"
+tables = pd.read_html(url)
+
+batting = tables[0]
+print(batting.head())</code></pre>
+      </figure>
+
+      <p><strong>注意点</strong></p>
+      <ul>
+        <li>robots.txt・利用規約・アクセス頻度（待機時間）に注意。</li>
+        <li>ページ構造変更に弱い。JavaScript 描画や Cloudflare 等で取得できない場合がある。</li>
+        <li>有料・会員限定データをスクレイピングして再配布するのは避けるべき。</li>
+        <li>コンペ運営では、参加者に直接スクレイピングさせるより、運営側がライセンス確認済みデータを配布する方が安全。</li>
+      </ul>
+
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section id="sec-5">
+      <h2 class="sec-title"><span class="num">05</span>よく使われている MLB データサイト一覧</h2>
+
+      <h3 id="sec-5-1">5.1 英語サイト</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>サイト</th><th>URL</th><th>主なデータ・特徴</th><th>料金</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Baseball Savant</td>
+              <td><a href="https://baseballsavant.mlb.com/" target="_blank" rel="noopener">baseballsavant.mlb.com</a></td>
+              <td>MLB 公式の Statcast データ検索・可視化・CSV ダウンロード。トラッキングデータの本丸。2026年時点では Bat Tracking や Swing Timing などの新しい指標も扱う</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>MLB.com Stats</td>
+              <td><a href="https://www.mlb.com/stats/" target="_blank" rel="noopener">mlb.com/stats</a></td>
+              <td>公式の基本スタッツ・リーダーボード</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>MLB Stats API</td>
+              <td><a href="https://statsapi.mlb.com/" target="_blank" rel="noopener">statsapi.mlb.com</a> （docs: <a href="https://docs.statsapi.mlb.com/" target="_blank" rel="noopener">docs.statsapi.mlb.com</a> ）</td>
+              <td>公式 JSON API。日程・試合・選手・ロースター・ライブフィード。キー不要のエンドポイント多数。仕様変更リスクあり</td>
+              <td><span class="badge free">無料 (非商用)</span></td>
+            </tr>
+            <tr>
+              <td>FanGraphs</td>
+              <td><a href="https://www.fangraphs.com/" target="_blank" rel="noopener">fangraphs.com</a></td>
+              <td>WAR・wRC+・FIP などセイバー指標が最充実。リーダーボードの CSV 出力可。プロスペクト・RosterResource も</td>
+              <td><span class="badge free">基本無料</span> (会員は2026年時点で月15ドル・年80ドル等)</td>
+            </tr>
+            <tr>
+              <td>Baseball Reference</td>
+              <td><a href="https://www.baseball-reference.com/" target="_blank" rel="noopener">baseball-reference.com</a></td>
+              <td>歴史データの百科事典。標準成績・WAR・カウント別などの細かい集計。統計表のエクスポート可</td>
+              <td><span class="badge free">基本無料</span> (Stathead は有料)</td>
+            </tr>
+            <tr>
+              <td>Retrosheet</td>
+              <td><a href="https://www.retrosheet.org/" target="_blank" rel="noopener">retrosheet.org</a></td>
+              <td>全史 play-by-play・ボックススコアの無料配布。1910〜2025年の AL/NL プレイバイプレイ。CSV 対応</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Lahman Database</td>
+              <td><a href="https://sabr.org/lahman-database/" target="_blank" rel="noopener">sabr.org/lahman-database</a></td>
+              <td>1871年以降のシーズン集計 DB（打撃・投球・守備・順位等）。R パッケージ版あり</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Baseball Databank</td>
+              <td><a href="https://github.com/chadwickbureau/baseballdatabank" target="_blank" rel="noopener">github.com/chadwickbureau/baseballdatabank</a></td>
+              <td>Lahman 系の GitHub 配布版</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Baseball Prospectus</td>
+              <td><a href="https://www.baseballprospectus.com/" target="_blank" rel="noopener">baseballprospectus.com</a></td>
+              <td>PECOTA・DRA・DRC+ など独自指標・予測・分析記事。PECOTA 詳細ダウンロードは Premium 以上が必要</td>
+              <td>一部無料・<span class="badge paid">有料購読あり</span></td>
+            </tr>
+            <tr>
+              <td>Spotrac</td>
+              <td><a href="https://www.spotrac.com/" target="_blank" rel="noopener">spotrac.com</a></td>
+              <td>年俸・契約データ</td>
+              <td><span class="badge free">基本無料</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="sec-5-2">5.2 日本語サイト・情報源</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>サイト</th><th>URL</th><th>特徴</th><th>料金</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MLB 公式 日本語版</td>
+              <td><a href="https://www.mlb.com/ja" target="_blank" rel="noopener">mlb.com/ja</a></td>
+              <td>公式ニュース・スタッツの日本語版。生データ分析というより試合・選手情報確認向け</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>スポーツナビ MLB</td>
+              <td><a href="https://baseball.yahoo.co.jp/mlb/" target="_blank" rel="noopener">baseball.yahoo.co.jp/mlb</a></td>
+              <td>日本語での MLB 試合速報・個人成績</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>1.02 Essence of Baseball (DELTA)</td>
+              <td><a href="https://1point02.jp/" target="_blank" rel="noopener">1point02.jp</a></td>
+              <td>WAR・UZR 等のセイバーメトリクス指標の日本語データベース・分析コラム。NPB 中心だが指標を日本語で学ぶ入口として有用</td>
+              <td><span class="badge free">無料会員</span> + 有料プラン</td>
+            </tr>
+            <tr>
+              <td>プロ野球データFreak</td>
+              <td><a href="https://baseball-data.com/" target="_blank" rel="noopener">baseball-data.com</a></td>
+              <td>NPB のセイバー指標を無料公開（NPB との比較素材に）</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>スタメンデータベース</td>
+              <td><a href="https://sta-men.jp/" target="_blank" rel="noopener">sta-men.jp</a></td>
+              <td>NPB のスタメン記録（NPB 側の素材）</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Lean Baseball (blog)</td>
+              <td><a href="https://shinyorke.hatenablog.com/" target="_blank" rel="noopener">shinyorke.hatenablog.com</a></td>
+              <td>Statcast データの日本語入門記事（Baseball Savant CSV 項目の日本語解説 <a href="https://shinyorke.hatenablog.com/entry/statcast-csv-docs-ja" target="_blank" rel="noopener">statcast-csv-docs-ja</a> など）。野球×データサイエンスの定番ブログ</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>鯖茶漬 (note)</td>
+              <td><a href="https://note.com/nana_metrics" target="_blank" rel="noopener">note.com/nana_metrics</a></td>
+              <td>Baseball Savant の使い方（CSV 取得編・Search 機能編）を日本語で丁寧に解説（例: <a href="https://note.com/nana_metrics/n/nc74cd3d95f16" target="_blank" rel="noopener">nc74cd3d95f16</a> ）</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>note の MLB データ解説記事</td>
+              <td><a href="https://note.com/" target="_blank" rel="noopener">note.com</a></td>
+              <td>FanGraphs や Baseball Savant を巡回する使い方の紹介記事など（例: <a href="https://note.com/baseball_felix/n/n15f9ba110dcb" target="_blank" rel="noopener">n15f9ba110dcb</a> ）</td>
+              <td>無料/有料混在</td>
+            </tr>
+            <tr>
+              <td>Zenn: スポーツデータサイト一覧 (野球編)</td>
+              <td><a href="https://zenn.dev/genki_morph/articles/485bc82ffe975b" target="_blank" rel="noopener">zenn.dev/genki_morph/articles/485bc82ffe975b</a></td>
+              <td>野球データサイトの日本語まとめ記事</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Qiita: セイバーメトリクスで利用できる MLB データ</td>
+              <td><a href="https://qiita.com/RWKiryu/items/d8de38004d369edaa53b" target="_blank" rel="noopener">qiita.com/RWKiryu/items/d8de38004d369edaa53b</a></td>
+              <td>R での MLB データ利用の日本語解説。同著者による Baseball Savant CSV ダウンロード解説 <a href="https://qiita.com/RWKiryu/items/8337b3eee0983458ce9b" target="_blank" rel="noopener">8337b3eee0983458ce9b</a> も</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>We Love Baseball まとめ</td>
+              <td><a href="https://wlbaseball.com/4421" target="_blank" rel="noopener">wlbaseball.com/4421</a></td>
+              <td>NPB・MLB データサイトの保存版まとめ</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="endnote">※日本語圏のデータベースサイトは NPB 中心のものが多く、MLB の生データ取得は英語サイト（Baseball Savant 等）+ 日本語解説記事の組み合わせが実用的。</p>
+    </section>
+
+    <!-- ============ 6 ============ -->
+    <section id="sec-6">
+      <h2 class="sec-title"><span class="num">06</span>けが・手術データ（トミー・ジョン手術・IL）</h2>
+
+      <h3 id="sec-6-1">6.1 トミー・ジョン手術リスト</h3>
+      <div class="lead-note">
+        <p><strong>Jon Roegele 氏の「Tommy John Surgery List」（Google スプレッドシート）が事実上の決定版。</strong></p>
+      </div>
+      <ul>
+        <li>URL: <a href="https://docs.google.com/spreadsheets/d/1gQujXQQGOVNaiuwSN680Hq-FDVsCwvN-3AazykOBON0/edit" target="_blank" rel="noopener">https://docs.google.com/spreadsheets/d/1gQujXQQGOVNaiuwSN680Hq-FDVsCwvN-3AazykOBON0/edit</a></li>
+        <li>選手名・所属レベル (MLB/MiLB/大学/高校)・手術日・復帰日・執刀医・MLBAM 選手 ID を収録した包括リスト。報道ベースで確認された症例を収録し、現在も更新中 (2025年シーズン分まで反映。「2025年に登板した MLB 投手の39.1%が TJ 経験者」という集計も本人が公表)。無料。</li>
+        <li>MLBAM ID が入っているため、Statcast データ (pybaseball / baseballr) とそのまま結合できる。手術前後の球速・回転数比較など、コンペのお題に向く素材。</li>
+        <li>背景解説（SABR）: <a href="https://sabr.org/latest/roegele-an-analysis-of-available-tommy-john-surgery-data/" target="_blank" rel="noopener">https://sabr.org/latest/roegele-an-analysis-of-available-tommy-john-surgery-data/</a></li>
+      </ul>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code>import pandas as pd
+url = "https://docs.google.com/spreadsheets/d/1gQujXQQGOVNaiuwSN680Hq-FDVsCwvN-3AazykOBON0/export?format=csv&gid=0"
+tj = pd.read_csv(url)</code></pre>
+      </figure>
+
+      <h3 id="sec-6-2">6.2 IL (故障者リスト) 入りのデータ</h3>
+      <p class="endnote" style="margin-top:0;border-top:none;padding-top:0;">※DL (Disabled List) は2019年に IL (Injured List) へ改称。</p>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>ソース</th><th>URL</th><th>特徴</th><th>料金</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MLB Stats API <code>/transactions</code></td>
+              <td><a href="https://statsapi.mlb.com/api/v1/transactions" target="_blank" rel="noopener">statsapi.mlb.com/api/v1/transactions?startDate=...&endDate=...</a></td>
+              <td>IL 入り・復帰を含む全トランザクション。10日/60日 IL の別と故障内容が description に入る。期間・チーム・選手で絞り込み可。キー不要</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Pro Sports Transactions</td>
+              <td><a href="https://www.prosportstransactions.com/" target="_blank" rel="noopener">prosportstransactions.com</a></td>
+              <td>歴史的な DL/IL 移動の検索データベース。多くの研究・データセットの元ネタ</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Spotrac Injured Tracker</td>
+              <td><a href="https://www.spotrac.com/mlb/injured/" target="_blank" rel="noopener">spotrac.com/mlb/injured</a></td>
+              <td>シーズン別にチーム・選手・故障理由別の欠場日数・欠場給与額まで集計済み</td>
+              <td><span class="badge free">閲覧無料</span> (一部premium)</td>
+            </tr>
+            <tr>
+              <td>GitHub: robotallie/baseball-injuries</td>
+              <td><a href="https://github.com/robotallie/baseball-injuries" target="_blank" rel="noopener">github.com/robotallie/baseball-injuries</a></td>
+              <td>Pro Sports Transactions から収集した 2000〜2016年の DL データ CSV (約18,000行) 配布</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>Baseball Heat Maps DL Data</td>
+              <td><a href="https://www.baseballheatmaps.com/disabled-list-data/" target="_blank" rel="noopener">baseballheatmaps.com/disabled-list-data</a></td>
+              <td>MLB.com トランザクション由来の 2010〜2016年 DL データ</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>FanGraphs RosterResource Injury Report</td>
+              <td><a href="https://www.fangraphs.com/roster-resource/injury-report" target="_blank" rel="noopener">fangraphs.com/roster-resource/injury-report</a></td>
+              <td>現在進行中の故障者状況 (速報系)</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+            <tr>
+              <td>MLB.com Injury Report</td>
+              <td><a href="https://www.mlb.com/injury-report" target="_blank" rel="noopener">mlb.com/injury-report</a></td>
+              <td>公式の現在の故障者情報</td>
+              <td><span class="badge free">無料</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>プログラムでの取得例 (公式 API 経由・全 IL 移動を期間指定で):</p>
+      <figure class="code">
+        <figcaption>python</figcaption>
+        <pre><code>import statsapi  # MLB-StatsAPI
+tx = statsapi.get('transactions', {'startDate': '2025-03-01', 'endDate': '2025-10-01'})
+il_moves = [t for t in tx['transactions'] if 'Injured List' in t.get('description', '')]</code></pre>
+      </figure>
+
+      <p><strong>使い分けの目安</strong>: 過去の網羅データ分析なら「Roegele リスト + MLB Stats API transactions (または robotallie の CSV)」、欠場日数・金額のインパクトを見せたいなら Spotrac。</p>
+    </section>
+
+    <!-- ============ 7 ============ -->
+    <section id="sec-7">
+      <h2 class="sec-title"><span class="num">07</span>コンペ運営向け推奨</h2>
+
+      <h3 id="sec-7-1">7.1 初心者向けに最も扱いやすい構成</h3>
+      <ol>
+        <li>運営側が Baseball Savant から CSV を取得</li>
+        <li>列名説明を日本語で付ける（Lean Baseball の CSV 項目日本語解説が参考になる）</li>
+        <li>参加者には CSV を配布</li>
+        <li>Python/R の読み込みテンプレートを用意</li>
+        <li>発展課題として pybaseball / baseballr による追加取得を紹介</li>
+      </ol>
+      <p>この形が、環境構築トラブル・API 仕様変更・過剰アクセスを避けやすい。</p>
+
+      <h3 id="sec-7-2">7.2 参加者に直接取得させる場合の推奨順</h3>
+      <ol>
+        <li>Python: pybaseball</li>
+        <li>R: baseballr</li>
+        <li>API 学習: <code>requests</code> / <code>httr2</code> で MLB Stats API 直叩き</li>
+        <li>歴史分析: Lahman</li>
+        <li>発展分析: Retrosheet + Chadwick CLI</li>
+      </ol>
+      <p><strong>導入順の目安</strong>: Baseball Savant の画面操作で CSV 取得 → pybaseball / baseballr でコード取得、の2段階が挫折しにくい。</p>
+
+      <h3 id="sec-7-3">7.3 R と Python の対応関係</h3>
+      <p><code>baseballr::statcast_search_*</code> ⇔ <code>pybaseball.statcast_*</code> は、両言語とも同じ Baseball Savant を叩くため、部門としてどちらの言語でも同じ分析が可能。</p>
+
+      <h3 id="sec-7-4">7.4 利用上の注意</h3>
+      <ul>
+        <li>MLB 公式データ（Stats API・Statcast）は非商用・個人分析用途での利用が前提。</li>
+        <li>有料サイトのデータを無断で再配布しない。</li>
+        <li>スクレイピング系関数は利用規約・robots.txt・アクセス頻度（連続リクエストの待機時間）を確認する。FanGraphs 等は利用規約を確認。</li>
+        <li>API キーや個人アカウント情報を資料・GitHub に含めない。</li>
+        <li>コンペでは、データの取得日・取得元 URL・クエリ条件・ライセンス注意を明記する。</li>
+        <li>大量アクセスを避けるため、同じデータを全員が API から取得する設計ではなく、運営側の配布 CSV を基本にする。</li>
+        <li>Statcast の打球データは2015年以降が充実。年をまたぐ指標比較では計測仕様の変更（例: 2023年のボール・ストライクゾーン関連項目追加、2024年のアームアングル公開）に留意。</li>
+      </ul>
+
+      <h3 id="sec-7-5">7.5 まとめ</h3>
+      <p>2025〜2026年時点では、MLB データ分析の実務的な入口は <strong>Baseball Savant / Statcast + pybaseball / baseballr</strong>。試合日程やライブデータは <strong>MLB Stats API</strong>、歴史的なシーズン成績は <strong>Lahman</strong>、プレイバイプレイの長期分析は <strong>Retrosheet</strong> が有力。大学生向けコンペ資料では、まず CSV 配布で分析に集中させ、発展課題として Python・R・API 直叩きを紹介する構成が最も安全で教育効果も高い。</p>
+    </section>
+
+    <!-- ============ 付録 ============ -->
+    <section id="sec-appendix">
+      <h2 class="sec-title"><span class="num">＋</span>付録: ライブラリ・データベース別 公式ドキュメント早見表</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>対象</th><th>公式ドキュメント</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>pybaseball</td><td>GitHub: <a href="https://github.com/jldbc/pybaseball" target="_blank" rel="noopener">github.com/jldbc/pybaseball</a> ／ docs: <a href="https://github.com/jldbc/pybaseball/blob/master/docs/statcast.md" target="_blank" rel="noopener">docs/statcast.md</a></td></tr>
+            <tr><td>MLB-StatsAPI</td><td>GitHub: <a href="https://github.com/toddrob99/MLB-StatsAPI" target="_blank" rel="noopener">github.com/toddrob99/MLB-StatsAPI</a> ／ Wiki: <a href="https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints" target="_blank" rel="noopener">Endpoints</a> ／ PyPI: <a href="https://pypi.org/project/MLB-StatsAPI/" target="_blank" rel="noopener">pypi.org/project/MLB-StatsAPI</a></td></tr>
+            <tr><td>python-mlb-statsapi</td><td>GitHub: <a href="https://github.com/zero-sum-seattle/python-mlb-statsapi" target="_blank" rel="noopener">github.com/zero-sum-seattle/python-mlb-statsapi</a></td></tr>
+            <tr><td>baseball_scraper</td><td>GitHub: <a href="https://github.com/spilchen/baseball_scraper" target="_blank" rel="noopener">github.com/spilchen/baseball_scraper</a></td></tr>
+            <tr><td>baseball-stats-python</td><td>PyPI: <a href="https://pypi.org/project/baseball-stats-python/" target="_blank" rel="noopener">pypi.org/project/baseball-stats-python</a></td></tr>
+            <tr><td>baseballr</td><td>pkgdown: <a href="https://billpetti.github.io/baseballr/" target="_blank" rel="noopener">billpetti.github.io/baseballr</a> ／ CRAN: <a href="https://cran.r-project.org/web/packages/baseballr/index.html" target="_blank" rel="noopener">cran.r-project.org/…/baseballr</a></td></tr>
+            <tr><td>sabRmetrics</td><td>pkgdown: <a href="https://saberpowers.github.io/sabRmetrics/" target="_blank" rel="noopener">saberpowers.github.io/sabRmetrics</a> ／ GitHub: <a href="https://github.com/saberpowers/sabRmetrics" target="_blank" rel="noopener">github.com/saberpowers/sabRmetrics</a></td></tr>
+            <tr><td>Lahman (R パッケージ)</td><td>CRAN: <a href="https://cran.r-project.org/package=Lahman" target="_blank" rel="noopener">cran.r-project.org/package=Lahman</a> ／ マニュアル: <a href="https://cloud.r-project.org/web/packages/Lahman/Lahman.pdf" target="_blank" rel="noopener">Lahman.pdf</a></td></tr>
+            <tr><td>Lahman Database (生データ)</td><td>SABR: <a href="https://sabr.org/lahman-database/" target="_blank" rel="noopener">sabr.org/lahman-database</a></td></tr>
+            <tr><td>Baseball Databank</td><td>GitHub: <a href="https://github.com/chadwickbureau/baseballdatabank" target="_blank" rel="noopener">github.com/chadwickbureau/baseballdatabank</a></td></tr>
+            <tr><td>Chadwick CLI (cwevent 等)</td><td>GitHub: <a href="https://github.com/chadwickbureau/chadwick" target="_blank" rel="noopener">github.com/chadwickbureau/chadwick</a> ／ マニュアル: <a href="https://chadwick.readthedocs.io/" target="_blank" rel="noopener">chadwick.readthedocs.io</a> ／ バイナリ配布: <a href="https://github.com/chadwickbureau/chadwick/releases" target="_blank" rel="noopener">releases</a></td></tr>
+            <tr><td>MLB Stats API</td><td>docs: <a href="https://docs.statsapi.mlb.com/" target="_blank" rel="noopener">docs.statsapi.mlb.com</a> ／ ベース: <a href="https://statsapi.mlb.com/" target="_blank" rel="noopener">statsapi.mlb.com</a></td></tr>
+            <tr><td>Baseball Savant</td><td>Statcast Search: <a href="https://baseballsavant.mlb.com/statcast_search" target="_blank" rel="noopener">statcast_search</a> ／ CSV 仕様書: <a href="https://baseballsavant.mlb.com/csv-docs" target="_blank" rel="noopener">csv-docs</a></td></tr>
+            <tr><td>Retrosheet</td><td><a href="https://www.retrosheet.org/" target="_blank" rel="noopener">retrosheet.org</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 主な情報源 ============ -->
+    <section id="sec-sources">
+      <h2 class="sec-title"><span class="num">§</span>主な情報源</h2>
+      <ul class="sources">
+        <li><a href="https://github.com/jldbc/pybaseball" target="_blank" rel="noopener">github.com/jldbc/pybaseball</a></li>
+        <li><a href="https://github.com/jldbc/pybaseball/blob/master/docs/statcast.md" target="_blank" rel="noopener">pybaseball/blob/master/docs/statcast.md</a></li>
+        <li><a href="https://pypi.org/project/MLB-StatsAPI/" target="_blank" rel="noopener">pypi.org/project/MLB-StatsAPI</a></li>
+        <li><a href="https://github.com/toddrob99/MLB-StatsAPI" target="_blank" rel="noopener">github.com/toddrob99/MLB-StatsAPI</a></li>
+        <li><a href="https://github.com/toddrob99/MLB-StatsAPI/wiki/Endpoints" target="_blank" rel="noopener">toddrob99/MLB-StatsAPI/wiki/Endpoints</a></li>
+        <li><a href="https://github.com/zero-sum-seattle/python-mlb-statsapi" target="_blank" rel="noopener">github.com/zero-sum-seattle/python-mlb-statsapi</a></li>
+        <li><a href="https://billpetti.github.io/baseballr/" target="_blank" rel="noopener">billpetti.github.io/baseballr</a></li>
+        <li><a href="https://cran.r-project.org/web/packages/baseballr/index.html" target="_blank" rel="noopener">cran.r-project.org/web/packages/baseballr/index.html</a></li>
+        <li><a href="https://billpetti.github.io/baseballr/reference/statcast_search.html" target="_blank" rel="noopener">baseballr/reference/statcast_search.html</a></li>
+        <li><a href="https://billpetti.github.io/baseballr/reference/fg_batter_leaders.html" target="_blank" rel="noopener">baseballr/reference/fg_batter_leaders.html</a></li>
+        <li><a href="https://billpetti.github.io/baseballr/reference/mlb_schedule.html" target="_blank" rel="noopener">baseballr/reference/mlb_schedule.html</a></li>
+        <li><a href="https://billpetti.github.io/baseballr/reference/retrosheet_data.html" target="_blank" rel="noopener">baseballr/reference/retrosheet_data.html</a></li>
+        <li><a href="https://saberpowers.github.io/sabRmetrics/" target="_blank" rel="noopener">saberpowers.github.io/sabRmetrics</a></li>
+        <li><a href="https://cran.r-project.org/package=Lahman" target="_blank" rel="noopener">cran.r-project.org/package=Lahman</a></li>
+        <li><a href="https://cloud.r-project.org/web/packages/Lahman/Lahman.pdf" target="_blank" rel="noopener">cloud.r-project.org/web/packages/Lahman/Lahman.pdf</a></li>
+        <li><a href="https://sabr.org/lahman-database/" target="_blank" rel="noopener">sabr.org/lahman-database</a></li>
+        <li><a href="https://sabr.org/sabermetrics/data" target="_blank" rel="noopener">sabr.org/sabermetrics/data</a></li>
+        <li><a href="https://www.retrosheet.org/" target="_blank" rel="noopener">retrosheet.org</a></li>
+        <li><a href="https://baseballsavant.mlb.com/statcast_search" target="_blank" rel="noopener">baseballsavant.mlb.com/statcast_search</a></li>
+        <li><a href="https://baseballsavant.mlb.com/csv-docs" target="_blank" rel="noopener">baseballsavant.mlb.com/csv-docs</a></li>
+        <li><a href="https://www.mlb.com/glossary/statcast" target="_blank" rel="noopener">mlb.com/glossary/statcast</a></li>
+        <li><a href="https://docs.statsapi.mlb.com/" target="_blank" rel="noopener">docs.statsapi.mlb.com</a></li>
+        <li><a href="https://baseballwithr.wordpress.com/2025/01/06/csv-downloads-of-retrosheet-data-who-controls-the-count/" target="_blank" rel="noopener">baseballwithr.wordpress.com/2025/01/06/csv-downloads-of-retrosheet-data…</a></li>
+        <li><a href="https://plus.fangraphs.com/product/fangraphs-membership/" target="_blank" rel="noopener">plus.fangraphs.com/product/fangraphs-membership</a></li>
+        <li><a href="https://www.sports-reference.com/stathead/" target="_blank" rel="noopener">sports-reference.com/stathead</a></li>
+        <li><a href="https://faq.sports-reference.com/portal/en/kb/articles/how-to-download-data" target="_blank" rel="noopener">faq.sports-reference.com/…/how-to-download-data</a></li>
+        <li><a href="https://www.baseballprospectus.com/pecota-projections/" target="_blank" rel="noopener">baseballprospectus.com/pecota-projections</a></li>
+        <li><a href="https://developer.sportradar.com/baseball/reference/overview" target="_blank" rel="noopener">developer.sportradar.com/baseball/reference/overview</a></li>
+        <li><a href="https://sportsdata.io/developers/api-documentation/mlb" target="_blank" rel="noopener">sportsdata.io/developers/api-documentation/mlb</a></li>
+        <li><a href="https://note.com/nana_metrics/n/nc74cd3d95f16" target="_blank" rel="noopener">note.com/nana_metrics/n/nc74cd3d95f16</a></li>
+        <li><a href="https://note.com/baseball_felix/n/n15f9ba110dcb" target="_blank" rel="noopener">note.com/baseball_felix/n/n15f9ba110dcb</a></li>
+        <li><a href="https://shinyorke.hatenablog.com/entry/statcast-csv-docs-ja" target="_blank" rel="noopener">shinyorke.hatenablog.com/entry/statcast-csv-docs-ja</a></li>
+        <li><a href="https://zenn.dev/genki_morph/articles/485bc82ffe975b" target="_blank" rel="noopener">zenn.dev/genki_morph/articles/485bc82ffe975b</a></li>
+        <li><a href="https://qiita.com/RWKiryu/items/d8de38004d369edaa53b" target="_blank" rel="noopener">qiita.com/RWKiryu/items/d8de38004d369edaa53b</a></li>
+        <li><a href="https://qiita.com/RWKiryu/items/8337b3eee0983458ce9b" target="_blank" rel="noopener">qiita.com/RWKiryu/items/8337b3eee0983458ce9b</a></li>
+        <li><a href="https://wlbaseball.com/4421" target="_blank" rel="noopener">wlbaseball.com/4421</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1gQujXQQGOVNaiuwSN680Hq-FDVsCwvN-3AazykOBON0/edit" target="_blank" rel="noopener">docs.google.com/spreadsheets/d/1gQujXQQ…/edit</a></li>
+        <li><a href="https://sabr.org/latest/roegele-an-analysis-of-available-tommy-john-surgery-data/" target="_blank" rel="noopener">sabr.org/latest/roegele-an-analysis-of-available-tommy-john-surgery-data</a></li>
+        <li><a href="https://www.spotrac.com/mlb/injured/" target="_blank" rel="noopener">spotrac.com/mlb/injured</a></li>
+        <li><a href="https://github.com/robotallie/baseball-injuries" target="_blank" rel="noopener">github.com/robotallie/baseball-injuries</a></li>
+        <li><a href="https://www.baseballheatmaps.com/disabled-list-data/" target="_blank" rel="noopener">baseballheatmaps.com/disabled-list-data</a></li>
+      </ul>
+    </section>
+
+  </div>
+
+  <footer class="colophon">
+    <span>MLB データ収集方法の調査まとめ</span>
+    <span>SDSC2026 &nbsp;/&nbsp; 作成日 2026-07-11</span>
+  </footer>
+
+</div>
