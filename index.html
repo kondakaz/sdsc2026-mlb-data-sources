@@ -480,6 +480,7 @@
     font-weight: 700;
     margin: 0 0 .7rem;
   }
+  .sidenav a.nav-item + .label { margin-top: 1.1rem; }
   .sidenav a.nav-item {
     display: block;
     padding: .55rem .7rem;
@@ -518,7 +519,7 @@
       overflow: visible;
     }
     .sidenav .brand { display: none; }
-    .sidenav .label { margin: 0; }
+    .sidenav .label, .sidenav a.nav-item + .label { margin: 0; }
     .sidenav a.nav-item { margin: 0; padding: .3rem .6rem; }
     .sidenav a.nav-item.current { border-left: none; border-radius: 6px; }
   }
@@ -569,10 +570,11 @@
 
   <nav class="sidenav" aria-label="サイト内ページ">
     <div class="brand">SDSC2026<br>MLB 部門 資料</div>
-    <p class="label">サイト内ページ</p>
+    <p class="label">MLB 部門</p>
     <a class="nav-item current" href="index.html" aria-current="page">MLB データ収集方法の調査まとめ</a>
-    <a class="nav-item" href="past-reports.html">過去の分析報告アーカイブ</a>
     <a class="nav-item" href="glossary.html">データ用語集・Glossary</a>
+    <p class="label">研究会報告集</p>
+    <a class="nav-item" href="past-reports.html">過去の分析報告アーカイブ</a>
     <a class="nav-item" href="research-archive.html">研究アーカイブ検索（試作）</a>
     <div class="sidefoot">
       <a class="logo-link" href="https://sites.google.com/g.chuo-u.ac.jp/sdss-jss/" target="_blank" rel="noopener"><img class="logo" src="logo.png" alt="日本統計学会 スポーツデータサイエンス分科会" width="640" height="202"></a>
